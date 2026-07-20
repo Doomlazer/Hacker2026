@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>>canvasTemplate</title>
+</head>
+<style type="text/css">
+  @font-face {
+        font-family: "Hyperspace";
+            src: local("Hyperspace"),
+                url("Hyperspace.ttf") format("truetype");
+        }
+</style>
+<pre class="output"></pre>
+<body style="overflow: hidden; position: fixed;" onload="init()">
+  
+  <script type="text/javascript" src="./js/main.js"></script>
+  <script type="text/javascript" src="./js/util.js"></script>
+  <script type="text/javascript" src="./js/draw.js"></script>
+  <script type="text/javascript" src="./js/control.js"></script>
+  <script type="text/javascript" src="./js/animate.js"></script>
+  <script type="text/javascript" src="./js/users.js"></script>
+  <script type="tex.javascript" src="./data/locations.json"></script>
+  <script type="tex.javascript" src="./data/countries.json"></script>
+  <script type="tex.javascript" src="./data/cities.json"></script>
+  <script type="tex.javascript" src="./data/nodes.json"></script>
+  
+  <div id="canvasDiv" style="cursor: none; padding: 0;margin: auto;display: block;width: 800px;">
+    <canvas tabindex='1' id="canvas" width="1" height="1" style="border:2px solid #000000;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+    <canvas id="canvasMap" width="1" height="1" style="border:2px solid #000000; display: none;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+  </div>
+
+  <script>
+    const c = document.getElementById("canvas");
+    const ctx = c.getContext("2d");
+    const cMap = document.getElementById("canvasMap");
+    const ctxMap = cMap.getContext("2d");
+  </script>
+</body>
+</html>
