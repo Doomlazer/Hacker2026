@@ -24,31 +24,36 @@ class aniRect {
         this.boarderLineWidth = 10;
         this.textScale = 0.00005;
         this.textLines = []
-        this.textMaxLines = 16;
+        this.textMaxLines = 19;
         this.admins = [];
-        this.approvedComands = ["su"];
+        this.cmdLineNum = 0;
+        this.accounts = [{"user": "root", "pwd":"password1234", "admin": true, "userId":0}, 
+                            {"user": "rcrumb", "pwd":"comix", "admin": false, "userId":100}];
+        this.approvedComands = ["reg"];
+        this.displayLines = [];
         this.textDisplayChar = 0;
         this.typingEffect = true;
         this.date = "07/18/2026:19:37"
-        this.locNum = getRandInt(locations.length);
-        this.text = `Welcome to the mal-90 OS\n   It's ${this.date}\nregistered to: ${locations[this.locNum].homeowner} 
-        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accUnited Statesntium doloremque laudantium, 
-        totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae 
-        dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, 
-        sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro 
-        quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non 
-        numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim 
-        ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid 
-        ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse 
-        quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla
-        `;
+        this.locNum = cast.length;
+        this.text = `Welcome to the mal-90 OS\nIt's ${this.date}\n`;
         this.inputStr = "";
-        this.acceptInput = false;
+        this.acceptInput = true;
         this.lastInput = "";
+        this.promptChar = ">";
     }
 
     setText(theText) {
-        this.textLines = this.textWrapLines(ctx, theText, (this.xW/20)*18, 0);
+        ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
+        let wrapped = this.textWrapLines(ctx, theText, this.xW, 0);
+        console.log(`theTezt ${theText}`)
+        for (const line of wrapped) {
+            this.displayLines.push(line);
+        }
+        this.displayLines.push(this.promptChar);
+    }
+
+    setInput() {
+
     }
 
     clickHandler(e) {
@@ -62,55 +67,113 @@ class aniRect {
 
     keyHandler(e) {
         //console.log(`key pressed: ${e.key}`);
-        if (this.textDisplayChar < this.text.length) {
-            this.textDisplayChar = this.text.length;
-        }
+        //if (this.textDisplayChar < this.text.length) {
+        //    this.textDisplayChar = this.text.length;
+        //}
         if (e.key == "Enter") {
+            // execute entered string
             this.lastInput = this.inputStr;
             this.commandHandler();
+
         } else if (e.key == "ArrowUp") {
+            // redo last command 
             this.inputStr = this.lastInput;
+
+            ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
+            let wrapped = this.textWrapLines(ctx, this.inputStr, this.xW, 0);
+            for (let i = 0; i < wrapped.length; i++) {
+                if (i == 0) {
+                    // keep promptChar
+                    this.displayLines[this.displayLines.length-1] = this.promptChar + wrapped[i];
+                } else {
+                    this.displayLines.push(wrapped[i]);
+                }
+            }
+
         } else if (e.key == "ArrowDown") {
+            // immediately finish typing effect
             this.textDisplayChar = 0;
+
         } else if (e.key == "Backspace") {
-            this.inputStr = this.inputStr.substring(0, this.inputStr.length - 1);
+            if (this.inputStr.length > 0) {
+                // command holder
+                this.inputStr = this.inputStr.substring(0, this.inputStr.length - 1);
+
+                // and displayed text
+                let l = this.displayLines[this.displayLines.length-1];
+                if (l.length > 0) {
+                    // erase from last line
+                    this.displayLines[this.displayLines.length-1] = l.substring(0, l.length-1);
+                } else {
+                    // or pop empty line and erase from prev
+                    this.displayLines.pop();
+                    l = this.displayLines[this.displayLines.length-1]
+                    l = l.substring(0, l.length-1);
+                }
+            }
+
         } else {
             if (e.key != "Shift" &&
                 e.key != "ArrowLeft" &&
                 e.key != "ArrowRight") {
+                // add character to input    
                 this.inputStr += e.key;
+                this.displayLines[this.displayLines.length-1] += e.key;
+                // wrap if needed
+                let maxWidth = this.xW;
+                ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
+                let width = (ctx.measureText(this.displayLines[this.displayLines.length-1]).width);
+                if (width > maxWidth) {
+                    if (this.displayLines[this.displayLines.length-1].split(" ").length > 1) {
+                        // the command has a space
+                        const lastIndex = this.displayLines[this.displayLines.length-1].lastIndexOf(" ");
+                        const before = this.displayLines[this.displayLines.length-1].slice(0, lastIndex);
+                        const after = this.displayLines[this.displayLines.length-1].split(" ");
+                        this.displayLines[this.displayLines.length-1] = before;
+                        this.displayLines.push(after[after.length-1]);
+                    } else {
+                        // no space in command break the line
+                        let l = this.displayLines[this.displayLines.length-1];
+                        this.displayLines[this.displayLines.length-1] = l.substring(0, l.length-1);
+                        this.displayLines.push(l.substring(l.length));
+                    }
+                }
+
             }
         }
-        this.setText(this.inputStr);
     }
 
     commandHandler() {
         const command = this.inputStr.split(" ");
         this.inputStr = "";
-        //console.log(this);
+        console.log(`sent command ${command}`)
+
         // all systems must have an exit command, approved commands and admins are optional
         if (this.approvedComands.includes(command[0].toLowerCase())
             || this.admins.includes(player.uid)
             || command[0].toLowerCase() == "exit") {
+                
             if (command[0].toLowerCase() == "exit") {
+
                 this.text = "Goodbye..."
                 this.toOpen = false;
                 this.delete = true;
-            }
 
-            if (command[0].toLowerCase() == "clear") {
-                this.text = 'Cleared';
+            } else if (command[0].toLowerCase() == "clear") {
+
+                // reset map and display text
                 mapXOff = getWidth()/2;
                 mapYOff = getHeight()/2;
                 mapScale = 4;
                 mapSteps = 0;
                 mapInc = 2;
                 this.textDisplayChar = 0;
-                this.setText(this.text);
+                this.displayLines = [];
+                this.text = "";
                 updateMap = true;
-            }
 
-            if (command[0].toLowerCase() == "su") {
+            } else if (command[0].toLowerCase() == "su") {
+
                 // make uid admin: su 34093
                 let user = player.uid;
                 if (command[1] > 0) {
@@ -149,9 +212,9 @@ class aniRect {
 
                 this.textDisplayChar = 0;
                 this.setText(this.text);
-            }
 
-            if (command[0].toLowerCase() == "zoom") {
+            } else if (command[0].toLowerCase() == "zoom") {
+
                 if (command[1] < 0 || command[1] > 0) {
                     mapScale += parseInt(command[1]);
                 } else {
@@ -163,16 +226,14 @@ class aniRect {
                 this.text = `Map Zoom is now ${mapScale}`;
                 this.setText(this.text);
                 this.textDisplayChar = 0;
-            }
-
-            if (command[0].toLowerCase() == "scan") {
+            } else if (command[0].toLowerCase() == "scan") {
                 if (command.length = 1) {
                     // default country scan
                     this.textDisplayChar = 0;
-                    this.text = `Scanning ${player.selCity}: \n`;
+                    this.text = `Scanning ${player.selCountry}: \n`;
                     for (let i = 0; i < 100; i++) {
                         const r = getRandInt(nodes.length);
-                        if (nodes[r].country == player.selCity && !nodes[r].discoverd) {
+                        if (nodes[r].country == player.selCountry && !nodes[r].discoverd) {
                             nodes[r].discovered = true;
                             this.text += `Found...${nodes[r].ip_address}\n`;
                             this.setText(this.text);
@@ -182,9 +243,7 @@ class aniRect {
                     }
                     this.text += "Scan Complete"
                 }
-            }
-
-            if (command[0].toLowerCase() == "reg") {
+            } else if (command[0].toLowerCase() == "reg") {
                 // show registerd user
                 this.text = "";
                 let l = locations[this.locNum];
@@ -199,8 +258,7 @@ class aniRect {
                 //console.log(this.text);
                 this.textDisplayChar = 0;
                 this.setText(this.text);
-            }
-            if (command[0].toLowerCase() == "setparam") {
+            } else if (command[0].toLowerCase() == "setparam") {
                 //console.log(`this[command[1]]: ${this[command[1]]}`);
                 // player enters: setparm textColor #FF0000
                 if (command[1].toLowerCase() == "list") {
@@ -211,21 +269,19 @@ class aniRect {
                             this.text += key + ", ";
                         }
                     }
+                    this.setText(this.text);
                 }
 
-                switch (typeof this[command[1]]) {
-                    case ("boolean"):
-                        if (command[2].toLowerCase() == "false") {
-                            this[command[1]] = false;
-                        } else {
-                            this[command[1]] = true;
-                        }
-                        break;
-                    default:
-                        this[command[1]] = command[2];
+                if  (typeof this[command[1]] == "boolean") {
+                    if (command[2].toLowerCase() == "true") {
+                        this[command[1]] = true;
+                    } else {
+                        this[command[1]] = false;
+                    }
+                    this.setText(`RESULT this[${command[1]}]: ${this[command[1]]}`);
                 }
-                this.setText(`RESULT this[${command[1]}]: ${this[command[1]]}`);
-                //console.log(this);
+            } else {
+                this.setText(`INVALID COMMAND: ${command[0]}`);
             }
         } else {
             this.textDisplayChar = 0;
@@ -335,7 +391,7 @@ class aniRect {
         ctx.font = scaleFont(this.textScale * this.xW, "Hyperspace"); //"40px Hyperspace";
 
         // Wrap and draw text in rect, optionally add letters one at a time. 
-        if (this.typingEffect && this.textDisplayChar < this.text.length) {
+        /*if (this.typingEffect && this.textDisplayChar < this.text.length) {
             this.textDisplayChar ++;
             this.setText(this.text.substring(0, this.textDisplayChar));
             this.acceptInput = true;
@@ -344,18 +400,34 @@ class aniRect {
             this.textDisplayChar = this.text.length;
             this.setText(this.text.substring(0, this.textDisplayChar));
             this.acceptInput = true;
-        }
+        }*/
+       //console.log(`this.displayLines.length: ${this.displayLines.length}`);
+       if (this.displayLines.length == 0) {
+        this.setText(this.text);
+       }
+
+        /*if (this.textDisplayChar >= this.text.length &&
+            this.textLines[this.textLines.length-1] != this.promptChar) {
+            this.textLines.push(this.promptChar);
+        }*/
 
         // draw the text
         ctx.fillStyle = this.textColor;
         ctx.font = scaleFont(0.018, "Hyperspace");
-        if (this.textLines.length - this.textMaxLines > 0 ) {
-            this.textLines = this.textLines.slice(this.textLines.length - this.textMaxLines, this.textLines.length)
+
+        while (this.displayLines.length > this.textMaxLines) {
+            this.displayLines.shift();
+            //this.textLines = this.textLines.slice(this.textLines.length - this.textMaxLines, this.textLines.length)
         }
-        for (let i = 0; i < this.textLines.length; i++ ) {
+        /*for (let i = 0; i < this.textLines.length; i++ ) {
             //ctx.fillText(this.textLines[i], this.x1 + (this.xW/20), this.y1 + (this.yH/8) + (this.yH/8*i));
             
                 ctx.fillText(this.textLines[i], this.x1 + 
+                            (this.xW/20), this.y1 * 1.5 + 
+                            (this.xW/20 * 1.2 * i));
+        }*/
+        for (let i = 0; i <  this.displayLines.length; i++) {
+            ctx.fillText(this.displayLines[i], this.x1 + 
                             (this.xW/20), this.y1 * 1.5 + 
                             (this.xW/20 * 1.2 * i));
         }
@@ -381,8 +453,8 @@ class aniRect {
         var paragraphs = text.split('\n');
 
         for (var p = 0; p < paragraphs.length; p++) {
+          var currentLine = [];  
           var words = paragraphs[p].split(" ");
-          var currentLine = [];
 
           for (var i = 0; i < words.length; i++) {
             var phrase = words[i].split(tab);
@@ -412,6 +484,7 @@ class aniRect {
                 currentLine += word;
               }
             } else {
+                // to do deal with super long words
                 lines.push(currentLine);
                 currentLine = word;
             }

@@ -18,6 +18,8 @@ function doMouseMove(e) {
         mapYOff = oldOffY - ((mouseDownY - mouseY));
         mapSteps = 3;
         mapInc = 2;
+        mapCitiesSteps = 0;
+        mapNodeSteps = 0;
         drawMap();
     }
 }

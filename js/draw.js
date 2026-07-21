@@ -90,56 +90,57 @@ function drawMap() {
 
     // Draw Cities
     if (mapSteps >= mapStepsMax && player.drawCities) {
+        mapCitiesSteps += 1 + mapCitiesSteps/4;
         for (let i = 0; i < cities.length; i++) {
-            // loc
-            ctx.strokeStyle = '#0048ff';
-            ctx.lineWidth = 5;
-            ctx.strokeRect(((cities[i].lon) * mapScale) + mapXOff,
-                            (-(cities[i].lat) * mapScale) + mapYOff,
-                            5,5);
-            //console.log(locations[player.uid].address.country);
+            if (i < mapCitiesSteps) {
+                // loc
+                ctx.strokeStyle = '#0048ff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(((cities[i].lon) * mapScale) + mapXOff,
+                                (-(cities[i].lat) * mapScale) + mapYOff,
+                                1 * mapScale, 1 * mapScale);
+                //console.log(locations[player.uid].address.country);
 
-            if (mouseX > (cities[i].lon * mapScale) + mapXOff &&
-                mouseX < (cities[i].lon * mapScale) + mapXOff + 10 &&
-                mouseY > (-(cities[i].lat) * mapScale) + mapYOff &&
-                mouseY < (-(cities[i].lat) * mapScale) + mapYOff + 10) 
-                {
-                // move map to named loc
-                if (mouseDetail > 1) {
-                    mapScale = 7;
-                    mapXOff = (getWidth()/3*2) - ((cities[i].lon) * mapScale);
-                    mapYOff = (getHeight()/2) - (-(cities[i].lat) * mapScale);
-                    mapSteps = 30;
-                    mapNodeSteps = 0;
-                    mapInc = 2;
-                    player.selCity = cities[i].country;
-                    cast[0].text = `Selected city ${cities[i].name}, ${cities[i].country}`;
-                    cast[0].setText(cast[0].text);
-                    cast[0].textDisplayChar = 0;
-                    drawMap();
+                if (mouseX > (cities[i].lon * mapScale) + mapXOff &&
+                    mouseX < (cities[i].lon * mapScale) + mapXOff + (1 * mapScale) &&
+                    mouseY > (-(cities[i].lat) * mapScale) + mapYOff &&
+                    mouseY < (-(cities[i].lat) * mapScale) + mapYOff + (1 * mapScale)) {
+                    // move map to named loc
+                    if (mouseDetail > 1) {
+                        mapScale = 7;
+                        mapXOff = (getWidth()/3*2) - ((cities[i].lon) * mapScale);
+                        mapYOff = (getHeight()/2) - (-(cities[i].lat) * mapScale);
+                        mapSteps = 30;
+                        mapNodeSteps = 0;
+                        mapInc = 2;
+                        player.selCity = cities[i].country;
+                        cast[0].text = `Selected city ${cities[i].name}, ${cities[i].country}`;
+                        cast[0].setText(cast[0].text);
+                        cast[0].textDisplayChar = 0;
+                        drawMap();
+                    }
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = scaleFont(0.020, "arial");
+                    ctx.fillText(cities[i].name + ", " + cities[i].country +
+                                ",  x: " + (cities[i].lon) +
+                                ",  y: " + (cities[i].lat) +
+                                ", population: " + (cities[i].population),
+                                ((cities[i].lon) * mapScale) + mapXOff,
+                                (-(cities[i].lat) * mapScale) + mapYOff);
                 }
-                ctx.fillStyle = '#FF0000';
-                ctx.font = scaleFont(0.020, "arial");
-                ctx.fillText(cities[i].name + ", " + cities[i].country +
-                            ",  x: " + (cities[i].lon) +
-                            ",  y: " + (cities[i].lat) +
-                            ", population: " + (cities[i].population),
-                            ((cities[i].lon) * mapScale) + mapXOff,
-                            (-(cities[i].lat) * mapScale) + mapYOff);
-            }            
+            }           
         }
     }
 
     // draw network nodes
     if (mapSteps >= mapStepsMax && player.drawNodes) {
-        mapNodeSteps += 60;
+        mapNodeSteps += 1 + mapNodeSteps/4;
         for (let i = 0; i < nodes.length; i++) {
             if (i < mapNodeSteps && nodes[i].discovered) {
                 if (mouseX > (nodes[i].longitude * mapScale) + mapXOff &&
-                    mouseX < (nodes[i].longitude * mapScale) + mapXOff + 10 &&
+                    mouseX < (nodes[i].longitude * mapScale) + mapXOff + (1 * mapScale) &&
                     mouseY > (-(nodes[i].latitude) * mapScale) + mapYOff &&
-                    mouseY < (-(nodes[i].latitude) * mapScale) + mapYOff + 10) 
-                    {
+                    mouseY < (-(nodes[i].latitude) * mapScale) + mapYOff + (1 * mapScale)) {
                     // draw highlighted loc marker
                     ctx.strokeStyle = '#35e60e';
                     ctx.lineWidth = 3;

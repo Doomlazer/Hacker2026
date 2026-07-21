@@ -19,6 +19,7 @@ let mapSel = [];
 let cities = [];
 let nodes = [];
 let mapNodeSteps = 0;
+let mapCitiesSteps = 0;
 
 function init() {
     window.addEventListener('click', doClick);
@@ -54,11 +55,16 @@ function loadCities() {
         .then(result => {
             //console.log(cities);
             shuffle(cities);
-            let testRect = new aniRect(getWidth()/20, getHeight()/8, getWidth()/3, getHeight()/1.5);
+
             //player = new user(prompt("enter player name:"));
-            player = new user("Robort Copeland");
+            player = new Player("Robort Copeland");
             locations[0].homeowner = player.name;
-            cast.push(testRect);
+            gUsers.push(player);
+
+            let playersComp = new aniRect(getWidth()/20, getHeight()/8, getWidth()/3, getHeight()/1.5);
+            playersComp.admins.push(0); // add player as admin to own computer
+            cast.push(playersComp);
+            ctx.font = scaleFont(playersComp.textScale * playersComp.xW, playersComp.textFont);
             loadNodes()
         })
         .catch(error => console.error('Error loading cities JSON file', error));

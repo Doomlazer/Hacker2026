@@ -1,22 +1,26 @@
-class user {
-    constructor(name) {
-        this.name = name;
+class User {
+    constructor() {
+        this.cash = 100;
+        this.crypto = 0;
         this.uid = gUsers.length;
-        this.opaqueBackground = true;
-        this.toOpen = true;
-        this.delete = false;
         this.aniSpeed = 0.01;
-        this.ease = 0.075;
-        this.color = '#00b32a';
-        this.textColor = '#f30505';
-        this.textFont = "Hyperspace";
-        this.backgroundColor = '#044114';
-        this.selCity = locations[gUsers.length].address.country;
+        this.homeAddress = locations[gUsers.length].address;
+        this.workAddress;
         this.textDisplayChar = 0;
-        this.typingEffect = true;
-        this.drawCities = false;
-        this.drawNodes = nodes;
-        this.text = "This is\na much longer string with more info that needs to auto wrap. THWHE eiojeie eojie oej";
+    }
+}
 
+class Player extends User{
+    constructor(name) {
+        super();
+        this.name = name;
+        this.node = 0; // player's computer is always node zero
+        this.selNodeNum = 0; // selected node on map
+        this.selCountry = locations[gUsers.length].address.country; // selected country on map
+        this.hopStack = [];
+        this.focus;
+        this.drawCities = false;
+        this.drawNodes = true;
+        this.selCountry = locations[gUsers.length].address.country;
     }
 }
