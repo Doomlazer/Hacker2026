@@ -1,32 +1,31 @@
 class aniRect {
     constructor(x, y, width, height) {
-        this.opaqueBackground = true;
-        this.doubleBoarder = true;
-        this.isComputerIcon = false;
-        this.doubleBoarderWidth = width/20;
-        this.doubleBoarderHeight = height/20;
+        this.rectLineWidth = 1;
+        this.hasBoarder = true;
+        this.boarderWidth = width/40;
+        this.boarderHeight = height/40;
+        this.boarderLineWidth = 5;
+        this.isRounded = false;
         this.cornerRad = 20;
         this.toOpen = true;
         this.delete = false;
         this.aniSpeed = 0.01;
         this.ease = 0.075;
-        this.x1 = x;
+        this.x1 = x; // start
         this.y1 = y;
-        this.xP = 0;
+        this.xP = 0; // progress
         this.yP = 0;
-        this.xW = width;
+        this.xW = width; // max
         this.yH = height;
-        this.color = '#00b32a';
+        this.rectColor = '#028220';
         this.textColor = '#ffffff';
-        this.textFont = "Hyperspace";
-        this.backgroundColor = '#044114';
-        this.lineWidth = 1;
-        this.boarderLineWidth = 10;
-        this.textScale = 0.00005;
+        this.fontSize = 20;
+        this.textFont = "Courier New"; // "Hyperspace";
+        this.opaqueBackground = true;
+        this.backgroundColor = '#404141';
         this.textLines = []
-        this.textMaxLines = 19;
+        this.textMaxLines = 0;
         this.admins = [];
-        this.cmdLineNum = 0;
         this.accounts = [{"user": "root", "pwd":"password1234", "admin": true, "userId":0}, 
                             {"user": "rcrumb", "pwd":"comix", "admin": false, "userId":100}];
         this.approvedComands = ["reg"];
@@ -35,7 +34,7 @@ class aniRect {
         this.typingEffect = true;
         this.date = "07/18/2026:19:37"
         this.locNum = cast.length;
-        this.text = `Welcome to the mal-90 OS\nIt's ${this.date}\n`;
+        this.text = `Welcome to the mal-90 OS\nIt's ${this.date}`;
         this.inputStr = "";
         this.acceptInput = true;
         this.lastInput = "";
@@ -43,17 +42,21 @@ class aniRect {
     }
 
     setText(theText) {
-        ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
-        let wrapped = this.textWrapLines(ctx, theText, this.xW, 0);
-        console.log(`theTezt ${theText}`)
+        // Set font and text color
+        ctx.fillStyle = this.textColor;
+        ctx.font = this.fontSize + "px " + this.textFont;
+
+        // set max lines
+        this.textMaxLines = Math.floor(this.yH / (this.fontSize * 1.25));
+
+        // wrap text
+        let wrapped = this.textWrapLines(ctx, theText, this.xW - this.fontSize, 0);
         for (const line of wrapped) {
             this.displayLines.push(line);
         }
+        
+        // add the input prompt
         this.displayLines.push(this.promptChar);
-    }
-
-    setInput() {
-
     }
 
     clickHandler(e) {
@@ -66,10 +69,6 @@ class aniRect {
     }
 
     keyHandler(e) {
-        //console.log(`key pressed: ${e.key}`);
-        //if (this.textDisplayChar < this.text.length) {
-        //    this.textDisplayChar = this.text.length;
-        //}
         if (e.key == "Enter") {
             // execute entered string
             this.lastInput = this.inputStr;
@@ -79,8 +78,8 @@ class aniRect {
             // redo last command 
             this.inputStr = this.lastInput;
 
-            ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
-            let wrapped = this.textWrapLines(ctx, this.inputStr, this.xW, 0);
+            ctx.font = this.fontSize + "px " + this.textFont;
+            let wrapped = this.textWrapLines(ctx, this.inputStr, this.xW - this.fontSize, 0);
             for (let i = 0; i < wrapped.length; i++) {
                 if (i == 0) {
                     // keep promptChar
@@ -120,8 +119,8 @@ class aniRect {
                 this.inputStr += e.key;
                 this.displayLines[this.displayLines.length-1] += e.key;
                 // wrap if needed
-                let maxWidth = this.xW;
-                ctx.font = scaleFont(this.textScale * this.xW, this.textFont);
+                let maxWidth = this.xW - this.fontSize;
+                ctx.font = this.fontSize + "px " + this.textFont;
                 let width = (ctx.measureText(this.displayLines[this.displayLines.length-1]).width);
                 if (width > maxWidth) {
                     if (this.displayLines[this.displayLines.length-1].split(" ").length > 1) {
@@ -155,22 +154,59 @@ class aniRect {
                 
             if (command[0].toLowerCase() == "exit") {
 
-                this.text = "Goodbye..."
+                this.setText("Goodbye...");
+
                 this.toOpen = false;
                 this.delete = true;
 
+            } else if (command[0].toLowerCase() == "map") {
+                let helpText = "Map Help:\n" +
+                                "Various map related options\n" +
+                                "\tformat: map [option]\n" +
+                                "Toggle show/hide options:\n" +
+                                "\tmap nodes\n" +
+                                "\tmap cities\n" +
+                                "reset to defaults:\n" +
+                                "\tmap reset";
+                if (command.length < 2) {
+                    this.setText(helpText);
+                } else if (command[1].toLowerCase() == "nodes") {
+                    // toggle nodes
+                    if (player.drawNodes) {
+                        player.drawNodes = false;
+                        this.setText("Hide nodes");
+                    } else {
+                        player.drawNodes = true;
+                        mapNodeSteps = 0
+                        this.setText("Show nodes");
+                    }
+                } else if (command[1].toLowerCase() == "cities") {
+                    // toggle cities
+                    if (player.drawCities) {
+                        player.drawCities = false;
+                        this.setText("Hide Cities");
+                    } else {
+                        player.drawCities = true;
+                        mapCitiesSteps = 0
+                        this.setText("Show Cities");
+                    }
+                } else if (command[1].toLowerCase() == "reset") {
+                    // toggle reset
+                    mapXOff = getWidth()/2;
+                    mapYOff = getHeight()/2;
+                    mapScale = 4;
+                    mapSteps = 0;
+                    mapInc = 2;
+                    this.setText("Map reset to defaults");
+                    updateMap = true;
+                } else {
+                    this.setText(helpText);
+                }
             } else if (command[0].toLowerCase() == "clear") {
 
-                // reset map and display text
-                mapXOff = getWidth()/2;
-                mapYOff = getHeight()/2;
-                mapScale = 4;
-                mapSteps = 0;
-                mapInc = 2;
-                this.textDisplayChar = 0;
+                // reset display text
                 this.displayLines = [];
-                this.text = "";
-                updateMap = true;
+                this.displayLines.push(this.promptChar);
 
             } else if (command[0].toLowerCase() == "su") {
 
@@ -278,7 +314,14 @@ class aniRect {
                     } else {
                         this[command[1]] = false;
                     }
-                    this.setText(`RESULT this[${command[1]}]: ${this[command[1]]}`);
+                    this.setText(`RESULT [${command[1]}] is ${this[command[1]]}`);
+                } else if (typeof this[command[2]] == "number") {
+                    // convert numbers from string
+                    this[command[1]] = Number(command[2]);
+                    this.setText(`RESULT [${command[1]}] is ${this[command[1]]}`);
+                } else {
+                    this[command[1]] = command[2];
+                    this.setText(`RESULT [${command[1]}] is ${this[command[1]]}`);
                 }
             } else {
                 this.setText(`INVALID COMMAND: ${command[0]}`);
@@ -297,9 +340,9 @@ class aniRect {
     }
 
     draw() {
-        // update the animation, blit the rect and then if fully open draw text.
-
+        // update the animation, blit the rect and boarders if fully open draw text.
         if (this.toOpen) {
+            // is opening
             if (this.xP < this.xW) {
                 this.xP += this.aniSpeed;
                 if (this.xP > this.xW) {
@@ -322,6 +365,7 @@ class aniRect {
             }
 
         } else {
+            // is closing
             if (this.xP > 0) {
                 this.xP -= this.aniSpeed;
                 if (this.xP < 0) {
@@ -337,7 +381,6 @@ class aniRect {
             
             this.blitRect();
 
-            //console.log(this.xP,this.yP,this.x1,this.y1);
             if (this.xP == 0 && this.yP == 0) {
                 this.closedState();
             } else {
@@ -347,89 +390,73 @@ class aniRect {
     }
 
     blitRect() {
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = this.rectColor;
+        ctx.rectLineWidth = this.rectLineWidth;
+
         if (this.xP > 0 || this.yP > 0) {
             // background
             if (this.opaqueBackground) {
                 ctx.fillStyle = this.backgroundColor;
-                //ctx.fillRect(this.x1, this.y1, this.xP, this.yP);
+                if (this.isRounded) {
+                    ctx.beginPath();
+                    ctx.roundRect(this.x1, this.y1, this.xP, this.yP, this.cornerRad);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(this.x1, this.y1, this.xP, this.yP);
+                }
+    
+            }
+
+            // main rect
+            if (this.isRounded) {
                 ctx.beginPath();
                 ctx.roundRect(this.x1, this.y1, this.xP, this.yP, this.cornerRad);
-                ctx.fill();
+                ctx.stroke();
+            } else {
+                ctx.strokeRect(this.x1, this.y1, this.xP, this.yP);
             }
-            //ctx.strokeRect(this.x1, this.y1, this.xP, this.yP);
-            // main rect
-            ctx.beginPath();
-            ctx.roundRect(this.x1, this.y1, this.xP, this.yP, this.cornerRad);
-            ctx.stroke();
 
             // boarder
-            ctx.lineWidth = this.boarderLineWidth;
-            if (this.isComputerIcon) {
-                ctx.beginPath();
-                ctx.roundRect(this.x1 - (this.doubleBoarderWidth * (this.xP/this.xW)),
-                                this.y1 - (this.doubleBoarderHeight * (this.yP / this.yH)),
-                                this.xP + ((this.doubleBoarderWidth * (this.xP/this.xW)) * 2),
-                                this.yP + ((this.doubleBoarderHeight * (this.yP / this.yH)) * 7),
-                                this.cornerRad);
-                ctx.stroke();
-            } else if (this.doubleBoarder) {
-                ctx.beginPath();
-                ctx.roundRect(this.x1 - (this.doubleBoarderWidth * (this.xP/this.xW)),
-                                this.y1 - (this.doubleBoarderHeight * (this.yP / this.yH)),
-                                this.xP + ((this.doubleBoarderWidth * (this.xP/this.xW)) * 2),
-                                this.yP + ((this.doubleBoarderHeight * (this.yP / this.yH)) * 2),
-                            this.cornerRad);
-                ctx.stroke();
+            if (this.hasBoarder) {
+                ctx.lineWidth = this.boarderLineWidth;
+                if (this.isRounded) {
+                    ctx.beginPath();
+                    ctx.roundRect(this.x1 - (this.boarderWidth * (this.xP/this.xW)),
+                                    this.y1 - (this.boarderHeight * (this.yP / this.yH)),
+                                    this.xP + ((this.boarderWidth * (this.xP/this.xW)) * 2),
+                                    this.yP + ((this.boarderHeight * (this.yP / this.yH)) * 2),
+                                    this.cornerRad);
+                    ctx.stroke();
+                } else {
+                    ctx.strokeRect(this.x1 - (this.boarderWidth * (this.xP/this.xW)),
+                                    this.y1 - (this.boarderHeight * (this.yP / this.yH)),
+                                    this.xP + ((this.boarderWidth * (this.xP/this.xW)) * 2),
+                                    this.yP + ((this.boarderHeight * (this.yP / this.yH)) * 2));
+                }
             }
         }
     }
     
     openedState() {
-        //ctx.font = scaleFont(this.textScale * this.xW, "Hyperspace"); //"40px Hyperspace";
-        ctx.font = scaleFont(this.textScale * this.xW, "Hyperspace"); //"40px Hyperspace";
+        // initial text if needed
+        if (this.displayLines.length == 0) {
+            this.inputStr = "";
+            this.setText(this.text);
+        }
 
-        // Wrap and draw text in rect, optionally add letters one at a time. 
-        /*if (this.typingEffect && this.textDisplayChar < this.text.length) {
-            this.textDisplayChar ++;
-            this.setText(this.text.substring(0, this.textDisplayChar));
-            this.acceptInput = true;
-        } else if (this.textLines.length == 0) {
-            // init wrap if needed
-            this.textDisplayChar = this.text.length;
-            this.setText(this.text.substring(0, this.textDisplayChar));
-            this.acceptInput = true;
-        }*/
-       //console.log(`this.displayLines.length: ${this.displayLines.length}`);
-       if (this.displayLines.length == 0) {
-        this.setText(this.text);
-       }
-
-        /*if (this.textDisplayChar >= this.text.length &&
-            this.textLines[this.textLines.length-1] != this.promptChar) {
-            this.textLines.push(this.promptChar);
-        }*/
-
-        // draw the text
+        // Set font and text color
         ctx.fillStyle = this.textColor;
-        ctx.font = scaleFont(0.018, "Hyperspace");
+        ctx.font = this.fontSize + "px " + this.textFont;
 
+        // remove overflow lines
         while (this.displayLines.length > this.textMaxLines) {
             this.displayLines.shift();
-            //this.textLines = this.textLines.slice(this.textLines.length - this.textMaxLines, this.textLines.length)
         }
-        /*for (let i = 0; i < this.textLines.length; i++ ) {
-            //ctx.fillText(this.textLines[i], this.x1 + (this.xW/20), this.y1 + (this.yH/8) + (this.yH/8*i));
-            
-                ctx.fillText(this.textLines[i], this.x1 + 
-                            (this.xW/20), this.y1 * 1.5 + 
-                            (this.xW/20 * 1.2 * i));
-        }*/
+        
+        // draw the text
         for (let i = 0; i <  this.displayLines.length; i++) {
-            ctx.fillText(this.displayLines[i], this.x1 + 
-                            (this.xW/20), this.y1 * 1.5 + 
-                            (this.xW/20 * 1.2 * i));
+            ctx.fillText(this.displayLines[i], this.x1 + this.fontSize/2, 
+                        this.y1 + (this.fontSize) + (this.fontSize * 1.25 * i));
         }
     }
 

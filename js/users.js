@@ -19,7 +19,7 @@ class Player extends User{
         this.selCountry = locations[gUsers.length].address.country; // selected country on map
         this.hopStack = [];
         this.focus;
-        this.drawCities = false;
+        this.drawCities = true;
         this.drawNodes = true;
         this.selCountry = locations[gUsers.length].address.country;
     }

@@ -120,10 +120,8 @@ function drawMap() {
                         drawMap();
                     }
                     ctx.fillStyle = '#FF0000';
-                    ctx.font = scaleFont(0.020, "arial");
+                    ctx.font = scaleFont(0.018, "arial");
                     ctx.fillText(cities[i].name + ", " + cities[i].country +
-                                ",  x: " + (cities[i].lon) +
-                                ",  y: " + (cities[i].lat) +
                                 ", population: " + (cities[i].population),
                                 ((cities[i].lon) * mapScale) + mapXOff,
                                 (-(cities[i].lat) * mapScale) + mapYOff);
@@ -166,7 +164,7 @@ function drawMap() {
 
                     // text label
                     ctx.fillStyle = '#c37105d8';
-                    ctx.font = scaleFont(0.020, "arial");
+                    ctx.font = scaleFont(0.018, "arial");
                     ctx.fillText(nodes[i].city + ", " + nodes[i].country +
                                 ", " + (nodes[i].router.manufacturer) +
                                 " " + (nodes[i].router.model),
