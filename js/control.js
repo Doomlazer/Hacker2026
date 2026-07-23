@@ -20,6 +20,7 @@ function doMouseMove(e) {
         mapInc = 2;
         mapCitiesSteps = 0;
         mapNodeSteps = 0;
+        mapNodeStackSteps = 0;
         drawMap();
     }
 }

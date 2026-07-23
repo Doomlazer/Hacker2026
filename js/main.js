@@ -19,6 +19,7 @@ let mapSel = [];
 let cities = [];
 let nodes = [];
 let mapNodeSteps = 0;
+let mapNodeStackSteps = 0;
 let mapCitiesSteps = 0;
 
 function init() {

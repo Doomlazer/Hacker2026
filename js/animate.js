@@ -1,12 +1,12 @@
 class aniRect {
     constructor(x, y, width, height) {
+        this.isRounded = true;
+        this.cornerRad = 20;
         this.rectLineWidth = 1;
         this.hasBoarder = true;
         this.boarderWidth = width/40;
         this.boarderHeight = height/40;
         this.boarderLineWidth = 5;
-        this.isRounded = false;
-        this.cornerRad = 20;
         this.toOpen = true;
         this.delete = false;
         this.aniSpeed = 0.01;
@@ -39,6 +39,7 @@ class aniRect {
         this.acceptInput = true;
         this.lastInput = "";
         this.promptChar = ">";
+        this.authTries = 0;
     }
 
     setText(theText) {
@@ -137,7 +138,6 @@ class aniRect {
                         this.displayLines.push(l.substring(l.length));
                     }
                 }
-
             }
         }
     }
@@ -151,14 +151,104 @@ class aniRect {
         if (this.approvedComands.includes(command[0].toLowerCase())
             || this.admins.includes(player.uid)
             || command[0].toLowerCase() == "exit") {
-                
-            if (command[0].toLowerCase() == "exit") {
-
+             
+            if (player.askedForName) {
+                // check USERNAME
+                let notFound = true;
+                for (let i = 0; i < this.accounts.length; i++) {
+                    player.tryAuthName = command;
+                    //console.log(`trying ${this.accounts[i].user} == ${player.tryAuthName}`)
+                    if (this.accounts[i].user == player.tryAuthName) {
+                        // the entered username was valid, ask for pwd
+                        notFound = false;
+                        player.authAccountIndex = i;
+                        player.askedForName = false;
+                        player.askedForPwd = true;
+                        this.authTries = 0;
+                        this.setText("Enter password");
+                    }
+                }
+                if (notFound) {
+                    this.authTries ++;
+                    if (this.authTries >= 3) {
+                        this.setText("Invalid user. Too many attempts\nDisconnected...");
+                        player.askedForName = false;
+                        player.nodeStack.pop();
+                    } else {
+                        this.setText("Invalid user. Enter username");
+                    }
+                }
+            } else if (player.askedForPwd) {
+                // check PASSWORD
+                player.tryAuthPwd = command;
+                let notFound = true;
+                console.log(`${this.accounts[player.authAccountIndex].pwd} == ${player.tryAuthPwd}`)
+                if (this.accounts[player.authAccountIndex].pwd == player.tryAuthPwd) {
+                    this.setText(`Welcome, ${this.accounts[player.authAccountIndex].user}`);
+                    player.askedForPwd = false;
+                    notFound = false;
+                }
+                if (notFound) {
+                    this.authTries ++;
+                    if (this.authTries >= 3) {
+                        this.setText("Invalid password. Too many attempts\nDisconnected...");
+                        player.nodeStack.pop();
+                        this.askedForPwd = false;
+                    } else {
+                        this.setText("Incorrect. Enter password");
+                    }
+                }
+            
+            } else if (command[0].toLowerCase() == "exit") {
                 this.setText("Goodbye...");
-
                 this.toOpen = false;
                 this.delete = true;
 
+            } else if (command[0].toLowerCase() == "ssh") {
+                // accepts either ip or uNam@ip
+                // searches nodes until ip found and addis it to the connection chain
+                if (command.length < 2) {
+                    this.setText("shh help text");
+                } else {
+                    let addr = command[1].split("@");
+                    let ip;
+                    if (addr.length < 2) {
+                        // no user provided
+                        player.tryAuthName = player.uName;
+                        ip = addr[0];
+                    } else {
+                        // user@ip_address provided
+                        player.tryAuthName = addr[0];
+                        ip = addr[1];
+                    }
+                    console.log(`entered: ${player.tryAuthName}@${ip}`)
+                    // find the ip address
+                    let notFound = true;
+                    for (let i of nodes) {
+                        if (ip == i.ip_address) {
+                            console.log(i.id)
+                            console.log(i)
+                            player.nodeStack.push(i.id);
+                            notFound = false;
+                        }
+                    }
+
+                    if (notFound) {
+                        this.setText("Unable to open a connection or host does not exist.");
+                    } else {
+                        // get remote accounts
+                        let node = player.nodeStack[player.nodeStack.length-1];
+                        if (this.accounts.includes(player.tryAuthName)) {
+                            // found the username, skip to password
+                            player.askedForPwd = true;
+                            this.setText("Enter password");
+                        } else {
+                            // ask for a username
+                            player.askedForName = true;
+                            this.setText("Enter username");
+                        }
+                    }
+                }
             } else if (command[0].toLowerCase() == "map") {
                 let helpText = "Map Help:\n" +
                                 "Various map related options\n" +
@@ -196,6 +286,9 @@ class aniRect {
                     mapYOff = getHeight()/2;
                     mapScale = 4;
                     mapSteps = 0;
+                    mapCitiesSteps = 0;
+                    mapNodeSteps = 0;
+                    mapNodeStackSteps = 0;
                     mapInc = 2;
                     this.setText("Map reset to defaults");
                     updateMap = true;
@@ -258,6 +351,9 @@ class aniRect {
                 }
                 mapInc = 2;
                 mapSteps = 0;
+                mapCitiesSteps = 0;
+                mapNodeSteps = 0;
+                mapNodeStackSteps = 0;
                 updateMap = true;
                 this.text = `Map Zoom is now ${mapScale}`;
                 this.setText(this.text);

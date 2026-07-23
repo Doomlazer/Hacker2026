@@ -181,6 +181,25 @@ function drawMap() {
             }          
         }
     }
+
+    // draw network proxy connections on map
+    if (mapSteps >= mapStepsMax && player.drawNodes) {
+        let g = 155;
+        if (player.nodeStack.length > 1) {
+            for (let i = 0; i < player.nodeStack.length - 1; i++) {
+                //console.log(g/(player.nodeStack.length-i))
+                ctx.strokeStyle = `rgb(${(g/player.nodeStack.length)*(i+1)+100}, 20, 20)`;
+                let l1 = nodes[i];
+                let l2 = nodes[i+1];
+                mapNodeStackSteps += 0.02;
+                if (i < mapNodeStackSteps) {
+                    ctx.lineWidth = 1 * mapScale;
+                    drawLine([(l1.longitude * mapScale) + mapXOff, -(l1.latitude * mapScale) + mapYOff, 
+                              (l2.longitude * mapScale) + mapXOff, -(l2.latitude * mapScale) + mapYOff]);
+                }
+            }
+        }
+    }
 }
 
 function drawCursor() {
