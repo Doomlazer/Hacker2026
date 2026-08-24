@@ -40,11 +40,7 @@ function isSolitaireMatch(cardA, cardB) {
     const redA = suitA === 'H' || suitA === 'D';
     const redB = suitB === 'H' || suitB === 'D';
 
-    const correctedRank =
-        rankA === rankB - 1 ||
-        (rankA === 2 && rankB === 1);
-
-    return correctedRank && redA !== redB;
+    return rankA === rankB - 1 && redA !== redB;
 }
 
 function moveChildren(card) {
