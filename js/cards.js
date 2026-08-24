@@ -28,8 +28,11 @@ function initSolitaire() {
 }
 
 function isSolitaireMatch(cardA, cardB) {
-    const rank = { A: 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
-                    '7': 7, '8': 8, '9': 9, '10': 10, J: 11, Q: 12, K: 13 };
+    const rank = {
+        A: 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+        '7': 7, '8': 8, '9': 9, '10': 10,
+        J: 11, Q: 12, K: 13
+    };
 
     const suitA = cardA.card.slice(-1);
     const suitB = cardB.card.slice(-1);
@@ -40,7 +43,11 @@ function isSolitaireMatch(cardA, cardB) {
     const redA = suitA === 'H' || suitA === 'D';
     const redB = suitB === 'H' || suitB === 'D';
 
-    return rankA === rankB - 1 && redA !== redB;
+    // cardB must be exactly one rank higher than cardA,
+    // and the suits must alternate colors.
+    return rankA !== 1 &&
+           rankB === rankA + 1 &&
+           redA !== redB;
 }
 
 function moveChildren(card) {
