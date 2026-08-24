@@ -306,6 +306,14 @@ async function createFS(n) {
         );
 
         fs.createFile(
+            "C:\\System\\bin\\deck",
+            0,
+            0,
+            generateGiberish(116),
+            0
+        );
+
+        fs.createFile(
             "C:\\System\\bin\\brute",
             0,
             0,
@@ -502,6 +510,36 @@ function spawnReadWin(win, text) {
     player.readerWindow.push(rw);
     rw.setText(text, false);
     win.setText("Opening...");
+}
+
+function spawnCardWin(card, x, y, scale) {
+    // a text reader window
+    let rw = new aniRect(x,// + (player.cardWindow.length * 20),
+                            y,// + (player.cardWindow.length * 20), 
+                            100*scale, 140*scale);
+    //rw.fontSize = win.readerFontSize;
+    rw.acceptInput = false;
+    rw.x1 = getWidth();
+    rw.y1 = 10;
+    rw.backgroundColor = '#fdfdfd';
+    rw.rectColor = '#ff0000';
+    rw.textColor = '#58e5fa';
+    rw.isRounded = false;
+    rw.hasBoarder = false;
+    rw.type = "card";
+    rw.card = card;
+    rw.scale = scale;
+    rw.shown = false;
+    rw.prevX;
+    rw.pervY = 10;
+    rw.targetX = x;
+    rw.targetY = y;
+    rw.childCard;
+    cast.push(rw);
+    player.cardWindow.push(rw);
+    //rw.setText(text, false);
+    
+    return rw;
 }
 
 function spawnAudioWin(win, command) {
@@ -818,6 +856,19 @@ function doCleanLogs() {
     if (player.cleanSegment > nodes.length) {
         player.cleanSegment = 0;
         player
+    }
+}
+
+function setWindowPri(win) {
+    // PRIORITY
+    if (win.pri != 0) {
+        win.pri = cast.length; // set max pri
+        // downgrade the others
+        for (let i = 0; i < cast.length; i++) {
+            if (cast.indexOf(win) != i) {
+                cast[i].pri --;
+            }
+        }
     }
 }
 

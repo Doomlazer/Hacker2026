@@ -125,11 +125,49 @@ class aniRect {
     }
 
     clickHandler(e) {
-        //console.log(`clicked on ${this} e.details: ${e.detail}`);
-        if (e.detail > 1 && mouseUnclaimed) {
-            mouseUnclaimed = false;
-            this.toOpen = false;
-            this.delete = true;
+        if (e.detail > 1) {
+
+            // solitaire 
+            if (this.type == "card") { // && !this.shown) {
+                // cardblocked?
+                let blocked = false;
+                for (let i of player.cColumns) {
+                    if (i.includes(this)) {
+                        // cards above it?
+                        if (i.indexOf(this) < i.length - 1) {
+                            blocked = true;
+                        }
+                    }
+                }
+                // dont change blocked card priority
+                if (!blocked && player.cNotStoring && !player.cStored) {
+                    setWindowPri(this);
+                    this.shown = true;
+                }
+
+                // clicked cStack
+                if (this.targetX == player.cX &&
+                    this.targetY == player.cY && 
+                    player.cNotStoring && 
+                    !player.cStored) {
+                        
+                    // deal car to right of stack
+                    this.shown = true;
+                    this.targetX = player.cX + (120 * player.cScale);
+                    setWindowPri(this);
+                    // move card from cStack. array to CDiscard
+                    player.cDiscard.push(player.cStack.pop());
+                    //console.log("stack to discard ", player.cStack,player.cDiscard)
+                    // return cards to stack
+                    if (player.cStack.length < 1) {
+                        // save top card and feed to stack
+                        resetCardStack();
+                    }
+                }
+            } else {
+                this.toOpen = false;
+                this.delete = true;
+            }
         }
     }
 

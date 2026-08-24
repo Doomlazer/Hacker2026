@@ -145,6 +145,10 @@ function commandHandler(win, mal = false) {
                     // display help file
                     helpCommand(win);
                     break;
+                case 'deck':
+                    // display help file
+                    deckCommand(win, command);
+                    break;
                 case 'date':
                     // print current date/time
                     dateCommand();
@@ -270,10 +274,11 @@ Mal90 Operations Manual
 
         \tWindow click priority is still broken
         \tCorporations are evil
+        \tClicking on nodes in the map causes crashing
         
         Remember that, like a hammer, a computer is just a tool; The morality of its use is determined by the individu4l. - CMOTDibblersDistant2ndCousin
         
-        IMPORTANT DISCLAIMER: While this is a browser-based game, the simulated computers are created locally on your device only. The pretend tools, like SSH, are NOT connecting over the internet to real computers. The DTMF tones from DIAL are NOT makeing real world phone calls. That said, this game does make real network connections for the command AUDIO, which streams music from real urls over the real world (outside this game) internet.
+        IMPORTANT DISCLAIMER: While this is a browser-based game, the simulated computers are created locally on your device only. The pretend tools in this videogame, such as SSH, are NOT connecting over the internet to real computers. The DTMF tones from DIAL are NOT makeing real world phone calls. That said, this game does make real network connections for the command AUDIO, which streams music from real urls over the real world (outside this game) internet.
         
         
         COMMANDS
@@ -996,4 +1001,23 @@ function malCommand(win, command) {
     win.setText(win.text, false);
     win.inputStr = command;
     commandHandler(win, true);
+}
+
+function deckCommand(win, command) {
+    if (command.length > 1) {
+        if (command[1].toLowerCase() == "quit") {
+            for (const card of player.cardWindow) {
+                const index = cast.indexOf(card);
+
+                if (index !== -1) {
+                    //cast[0].setText("Delete..." + cast[index], false);
+                    cast.splice(index, 1);
+                }
+            }
+            player.cardWindow = [];
+            cast[0].setText("Deletd Cards");
+        }
+    } else {
+        initSolitaire();
+    }
 }

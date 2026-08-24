@@ -21,8 +21,19 @@ class User {
 class Player extends User{
     constructor(name) {
         super();
+        this.cardWindow = [];
         this.cleanSegment = 0;
         this.lastScanIP = [];
+        this.cColumns = [[],[],[],[],[],[],[]];
+        this.cHoles = [[],[],[],[]];
+        this.cStack = [];
+        this.cDiscard = [];
+        this.cMoney = 100;
+        this.cScale = 0.8;
+        this.cNotStoring = true;
+        this.cX = getWidth() - 20 - (7 * (120 * this.cScale));
+        this.cY = 20;
+        this.cStored = false;
         this.compromisedComputers = [];
         this.name = name;
         this.uName = this.name.split(" ")[0].substring(0,1).toLowerCase() + this.name.split(" ")[1].toLowerCase();
@@ -57,5 +68,6 @@ class Player extends User{
         this.bY1 = getHeight()/8;
         this.bXW = 300;
         this.bYH = 130;
+        this.ignoreMouseDrag = false;
     }
 }

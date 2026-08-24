@@ -7,12 +7,27 @@ function draw() {
 
     drawMap();
 
+    // release player.cNotProcessing if complete
+    if (!player.cNotStoring) {
+        let done = true;
+        for (let win of cast) {
+            if (win.type == "card") {
+                if (!(win.x1 == win.targetX && win.y1 == win.targetY)) {
+                    done = false;
+                }
+            }
+        }
+        if (done) {
+            player.cNotStoring = true;
+        }
+    }
     // draw windows based on priority, highest is top most window
     let s = cast.toSorted((a, b) => a.pri - b.pri);
     for (let i = 0; i < s.length; i++) {
        drawWin(s[i]);
     }
 
+    //drawIcon()
     drawCursor();
 }
 
@@ -219,6 +234,7 @@ function drawCities(bSize) {
 
                 if (city.population > player.cityPopulationThreshold) {
                     // gradient effect
+                    ctxMarkers.globalAlpha = 1;
                     ctxMarkers.strokeStyle = brighten('#0048ff', city.lat * 0.4 - 20);
                     ctxMarkers.lineWidth = 1;
                     ctxMarkers.strokeRect(
@@ -234,7 +250,7 @@ function drawCities(bSize) {
                         mouseY < (-city.lat * mapScale) + mapYOff + (bSize * mapScale)) {
                         // mouseDeatil is number of clicks, move 
                         // map to named location on doubleclick
-                        if (mouseDetail > 1) {
+                        if (mouseDetail == 2 && mouseUnclaimed) {
                             mapScale = 30;
                             mapXOff = (getWidth()/3*2) - (city.lon * mapScale);
                             mapYOff = (getHeight()/2) - (-city.lat * mapScale);
@@ -247,7 +263,6 @@ function drawCities(bSize) {
                             cast[0].setText(cast[0].text);
                             player.selectedCity = city;
                             updateMap = true;
-                            drawMap();
                         }
                         mouseLabel = city.name + ", " + city.country +
                                     ", population: " + (city.population);
@@ -269,6 +284,7 @@ function drawNodes(bSize) {
                     mouseY > (-node.latitude * mapScale) + mapYOff  - (bSize * mapScale/2) &&
                     mouseY < (-node.latitude * mapScale) + mapYOff + (bSize * mapScale)) {
                     // draw highlighted node marker
+                    ctxMarkers.globalAlpha = 1;
                     ctxMarkers.strokeStyle = '#e60ed4';
                     ctxMarkers.lineWidth = 3;
                     ctxMarkers.strokeRect(
@@ -286,7 +302,7 @@ function drawNodes(bSize) {
 
                     // mouseDeatil is number of clicks, move 
                     // map to named node on doubleclick
-                    if (mouseDetail > 1) {
+                    if (mouseDetail == 2 && mouseUnclaimed) {
                         mapScale = 50;
                         mapXOff = (getWidth()/3*2) - (node.longitude * mapScale);
                         mapYOff = (getHeight()/2) - (-node.latitude * mapScale);
@@ -301,7 +317,7 @@ function drawNodes(bSize) {
                         cast[0].setText(cast[0].text);
                         cast[0].textDisplayChar = 0;
                         player.selectedNode = nodes[i];
-                        drawMap();
+                        updateMap = true;
                     }
 
                     // text label, not sure this works. 
@@ -482,22 +498,28 @@ function drawIcon() {
     ctxMap.strokeStyle = '#ff1f02';
     ctxMap.lineWidth = 3;
     let icon = [[149, 9, 175, 10, 251, 43, 297, 101, 307, 125, 279, 72, 162, 34, 141, 38], [184, 16, 189, 19, 187, 25, 184, 30, 184, 35, 183, 29, 186, 25, 188, 22], [133, 19, 133, 23, 133, 27, 132, 27, 134, 26, 134, 24, 134, 22, 132, 21], [123, 21, 123, 25, 123, 29, 124, 31, 121, 30, 122, 27, 124, 24, 121, 22], [127, 23, 127, 25, 128, 26, 128, 28, 127, 29, 126, 30, 129, 26, 129, 24], [177, 23, 179, 25, 179, 29, 178, 32, 176, 34, 178, 29, 181, 27, 180, 24], [173, 24, 172, 27, 171, 30, 170, 33, 172, 34, 168, 31, 169, 28, 170, 30], [91, 26, 88, 29, 84, 31, 80, 33, 76, 35, 73, 37, 70, 38, 74, 38], [112, 26, 113, 30, 114, 34, 117, 33, 120, 31, 118, 36, 115, 32, 114, 29], [108, 28, 109, 32, 109, 37, 108, 41, 108, 46, 108, 51, 107, 47, 107, 43], [189, 28, 189, 31, 189, 34, 187, 35, 190, 32, 191, 30, 187, 31, 190, 30], [195, 30, 195, 33, 194, 35, 195, 37, 196, 36, 192, 34, 193, 34, 194, 32], [205, 30, 205, 33, 203, 34, 202, 36, 201, 37, 200, 35, 201, 35, 203, 33], [211, 31, 211, 34, 209, 35, 209, 38, 210, 39, 207, 37, 205, 37, 208, 35], [101, 32, 100, 39, 96, 43, 95, 36, 94, 40, 101, 40, 99, 37, 104, 33], [129, 32, 129, 42, 125, 44, 124, 38, 121, 42, 119, 42, 131, 41, 130, 39], [216, 34, 216, 38, 213, 40, 216, 37, 220, 34, 223, 35, 225, 38, 225, 35], [90, 38, 90, 40, 90, 42, 90, 44, 90, 46, 89, 47, 89, 45, 89, 43], [227, 39, 225, 41, 225, 45, 224, 45, 223, 42, 225, 40, 230, 39, 231, 42], [67, 40, 66, 43, 64, 43, 62, 46, 60, 46, 58, 49, 56, 50, 65, 43], [76, 40, 77, 45, 78, 50, 80, 54, 82, 50, 80, 46, 82, 53, 80, 50], [115, 41, 114, 44, 115, 47, 117, 45, 113, 46, 111, 44, 112, 47, 111, 47], [236, 43, 235, 44, 235, 46, 234, 47, 232, 47, 231, 47, 230, 48, 230, 47], [158, 44, 110, 73, 112, 56, 103, 58, 147, 70, 143, 73, 188, 87, 204, 108], [239, 45, 240, 47, 239, 49, 238, 50, 236, 49, 235, 52, 234, 52, 234, 50], [173, 46, 175, 46, 177, 46, 178, 47, 180, 47, 182, 47, 183, 48, 185, 48], [103, 47, 102, 49, 102, 52, 103, 54, 104, 53, 106, 52, 101, 51, 103, 50], [193, 48, 204, 62, 214, 77, 224, 92, 234, 107, 240, 113, 223, 89, 208, 67], [251, 48, 249, 49, 244, 51, 239, 54, 241, 53, 249, 57, 244, 59, 250, 55], [94, 49, 94, 54, 94, 59, 96, 58, 93, 55, 96, 51, 97, 53, 98, 54], [73, 50, 72, 53, 72, 57, 74, 59, 74, 58, 73, 56, 71, 53, 75, 50], [136, 51, 134, 53, 138, 51, 140, 53, 142, 53, 144, 54, 143, 58, 143, 54], [207, 52, 213, 60, 218, 68, 224, 76, 229, 85, 235, 93, 241, 100, 226, 78], [61, 53, 61, 60, 64, 64, 66, 68, 66, 63, 65, 57, 64, 59, 64, 62], [187, 56, 188, 58, 187, 60, 185, 59, 183, 60, 181, 60, 179, 61, 179, 60], [160, 58, 163, 63, 168, 80, 161, 96, 151, 86, 161, 85, 160, 86, 183, 94], [46, 59, 46, 60, 46, 61, 46, 62, 45, 62, 45, 63, 44, 63, 43, 63], [142, 59, 142, 64, 140, 63, 138, 64, 137, 68, 140, 68, 139, 68, 141, 63], [216, 60, 217, 60, 218, 60, 218, 61, 219, 61, 220, 61, 220, 62, 221, 62], [251, 60, 250, 62, 249, 64, 249, 62, 247, 61, 252, 62, 253, 60, 256, 61], [42, 64, 34, 77, 26, 90, 29, 103, 31, 103, 20, 91, 18, 103, 23, 92], [57, 64, 58, 65, 59, 66, 59, 68, 60, 69, 60, 71, 61, 72, 62, 71], [190, 64, 189, 65, 188, 66, 187, 65, 186, 66, 185, 67, 184, 66, 191, 65], [196, 65, 196, 66, 196, 67, 197, 67, 197, 68, 197, 66, 197, 65, 198, 65], [250, 65, 256, 65, 260, 68, 256, 68, 254, 70, 262, 69, 266, 72, 267, 71], [56, 67, 56, 69, 56, 71, 56, 73, 56, 75, 56, 77, 55, 72, 55, 70], [126, 67, 123, 71, 128, 68, 132, 74, 134, 78, 133, 83, 129, 83, 131, 85], [102, 70, 101, 73, 100, 76, 98, 78, 97, 81, 95, 82, 97, 79, 99, 75], [153, 70, 150, 77, 146, 83, 143, 90, 139, 96, 142, 88, 147, 81, 150, 75], [198, 70, 197, 72, 195, 71, 193, 72, 191, 73, 189, 74, 188, 73, 199, 72]];
-    for (let i = 0; i < icon.length; i+=2) {
+    for (let i = 0; i < icon.length; i++) {
         drawLineMap(icon[i]);
     }
     ctxMap.strokeStyle = '#c91b04';
     ctxMap.lineWidth = 2;
-    for (let i = 0; i < icon.length; i+=2) {
+    for (let i = 0; i < icon.length; i++) {
         drawLineMap(icon[i]);
     }
     ctxMap.strokeStyle = '#8b1404';
     ctxMap.lineWidth = 1;
-    for (let i = 0; i < icon.length; i+=2) {
+    for (let i = 0; i < icon.length; i++) {
         drawLineMap(icon[i]);
     }
 }
 
 function drawWin(win) { // draw a window
+        if (win.type == "card") {
+            blitWinRect(win);
+            win.xP = win.xW;
+            win.xP = win.yH;
+            return;
+        }
         // update the animation, blit the rect and boarders if fully open draw text.
         if (win.toOpen) {
             // is opening
@@ -554,7 +576,7 @@ function drawWin(win) { // draw a window
 
         if (win.xP > 0 || win.yP > 0) {
             // background
-            if (win.opaqueBackground) {
+            if (win.opaqueBackground && win.type != "card") {
                 if (win.type != "reader") {
                     ctx.globalAlpha = win.alpha;
                 }
@@ -577,8 +599,9 @@ function drawWin(win) { // draw a window
 
             }
 
+
             // main rect
-            if (win.type != "audio") {
+            if (win.type != "audio" && win.type != "card" ) {
                 if (win.isRounded) {
                     ctx.beginPath();
                     ctx.roundRect(win.x1, win.y1, win.xP, win.yP, win.cornerRad);
@@ -616,9 +639,73 @@ function drawWin(win) { // draw a window
                                     win.y1 + win.yH - 20,
                                     20,
                                     20);
-
             }
 
+            // card
+            if (win.type == "card") {
+                // move cards twords dest
+                for (let c of player.cardWindow) {
+                    const speed = 0.6;
+
+                    const dx = c.targetX - c.x1;
+                    const dy = c.targetY - c.y1;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist <= speed) {
+                        c.x1 = c.targetX;
+                        c.y1 = c.targetY;
+                    } else {
+                        c.x1 += (dx / dist) * speed;
+                        c.y1 += (dy / dist) * speed;
+                    }
+                }
+                if (!win.cardLines) {
+                    win.cardLines = cardVector(win.card, 0, 0, win.xW / 100);
+                }
+                
+                const lines = win.cardLines;
+                //console.log("parasieJah" + lines)
+                // Fill card
+                const cardPath = new Path2D();
+                
+                cardPath.moveTo(lines[0][0]+win.x1, lines[0][1]+win.y1);
+
+                for (let i = 0; i < 8; i++) {
+                    cardPath.lineTo(lines[i][2]+win.x1, lines[i][3]+win.y1);
+                }
+
+                cardPath.closePath();
+                
+                if (win.shown) {
+                    ctx.globalAlpha = 1;
+                    ctx.fillStyle = win.backgroundColor;
+                } else {
+                    // back if card
+                    ctx.globalAlpha = win.alpha;
+                    ctx.fillStyle = '#0000FF'
+                }
+                ctx.fill(cardPath);
+                ctx.lineWidth = 2;
+                if (win.shown) {
+                    // Red / black
+                    const suit = win.card.slice(-1).toUpperCase();
+
+                    ctx.strokeStyle =
+                        (suit === "H" || suit === "D")
+                            ? "#fe0303"
+                            : "#0b0b0b";
+
+                    // Entire card in ONE canvas path
+                    drawCardLines(win, lines);
+                } else {
+                    ctx.strokeStyle = "#f5f3f3"
+                    //console.log(lines[1])
+                    drawCardLines(win, lines.slice(0, 8));
+                    ctx.strokeStyle = "#080808"
+                    drawCardLines(win, lines.slice(8, 16));
+                }
+                
+            }
             if (win.type == "audio") {
                 ctx.save();
 
@@ -1022,4 +1109,375 @@ function drawWin(win) { // draw a window
         win.yH
     );
 
+}
+
+function cardVector(card, offsetX = 0, offsetY = 0, scale = 1) {
+    const rank = card.slice(0, -1).toUpperCase();
+    const suit = card.slice(-1).toUpperCase();
+
+    const lines = [];
+
+    function line(x1, y1, x2, y2) {
+        lines.push([
+            offsetX + x1 * scale,
+            offsetY + y1 * scale,
+            offsetX + x2 * scale,
+            offsetY + y2 * scale
+        ]);
+    }
+
+    function path(points, closed = false) {
+        for (let i = 0; i < points.length - 1; i++) {
+            line(
+                points[i][0], points[i][1],
+                points[i + 1][0], points[i + 1][1]
+            );
+        }
+
+        if (closed) {
+            const a = points[points.length - 1];
+            const b = points[0];
+            line(a[0], a[1], b[0], b[1]);
+        }
+    }
+
+    // ------------------------------------------------------------
+    // CARD OUTLINE
+    // ------------------------------------------------------------
+
+    // Card is 100 x 140 vector units
+    path([
+        [8, 0],
+        [92, 0],
+        [100, 8],
+        [100, 132],
+        [92, 140],
+        [8, 140],
+        [0, 132],
+        [0, 8]
+    ], true);
+
+    // Inner border
+    path([
+        [12, 5],
+        [88, 5],
+        [95, 12],
+        [95, 128],
+        [88, 135],
+        [12, 135],
+        [5, 128],
+        [5, 12]
+    ], true);
+
+    // ------------------------------------------------------------
+    // VECTOR GLYPHS
+    // ------------------------------------------------------------
+
+    const glyphs = {
+
+        A: [
+            [[0, 40], [20, 0], [40, 40]],
+            [[8, 25], [32, 25]]
+        ],
+
+        K: [
+            [[0, 0], [0, 40]],
+            [[0, 20], [35, 0]],
+            [[0, 20], [35, 40]]
+        ],
+
+        Q: [
+            [[35, 8], [30, 3], [20, 0], [10, 3],
+             [3, 12], [3, 28], [10, 37],
+             [20, 40], [30, 37], [35, 28],
+             [35, 8]],
+            [[25, 28], [40, 43]]
+        ],
+
+        J: [
+            [[0, 0], [35, 0]],
+            [[28, 0], [28, 32], [23, 40],
+             [10, 40], [3, 32]]
+        ],
+
+        T: [
+            [[0, 0], [40, 0]],
+            [[20, 0], [20, 40]]
+        ],
+
+        "2": [
+            [[0, 5], [5, 0], [35, 0],
+             [40, 5], [40, 15],
+             [0, 40], [40, 40]]
+        ],
+
+        "3": [
+            [[0, 0], [35, 0], [40, 5],
+             [40, 17], [32, 20],
+             [40, 23], [40, 35],
+             [35, 40], [0, 40]]
+        ],
+
+        "4": [
+            [[30, 40], [30, 0]],
+            [[30, 0], [0, 28], [40, 28]]
+        ],
+
+        "5": [
+            [[40, 0], [5, 0], [5, 18],
+             [32, 18], [40, 23],
+             [40, 35], [32, 40], [0, 40]]
+        ],
+
+        "6": [
+            [[35, 0], [8, 20],
+             [3, 30], [8, 38],
+             [18, 40], [32, 38],
+             [40, 30], [35, 20],
+             [8, 20]]
+        ],
+
+        "7": [
+            [[0, 0], [40, 0], [15, 40]]
+        ],
+
+        "8": [
+            [[10, 0], [30, 0], [40, 10],
+             [30, 20], [40, 30],
+             [30, 40], [10, 40],
+             [0, 30], [10, 20],
+             [0, 10], [10, 0]]
+        ],
+
+        "9": [
+            [[40, 40], [32, 20],
+             [40, 10], [32, 2],
+             [18, 0], [5, 5],
+             [0, 15], [8, 22],
+             [25, 20]]
+        ],
+
+        "10": [
+            [[5, 0], [5, 40]],
+            [[0, 5], [5, 0]],
+            [[15, 0], [15, 40]],
+            [[15, 0], [35, 0]],
+            [[35, 0], [35, 40]],
+            [[15, 40], [35, 40]]
+        ]
+    };
+
+    const suitGlyphs = {
+
+    // HEART
+    H: [
+        [
+            [20, 40],
+            [5, 25],
+            [0, 16],
+            [0, 9],
+            [4, 3],
+            [10, 1],
+            [15, 3],
+            [20, 10],
+            [25, 3],
+            [30, 1],
+            [36, 3],
+            [40, 9],
+            [40, 16],
+            [35, 25],
+            [20, 40]
+        ]
+    ],
+
+    // DIAMOND
+    D: [
+        [
+            [20, 0],
+            [40, 20],
+            [20, 40],
+            [0, 20],
+            [20, 0]
+        ]
+    ],
+
+    // SPADE
+    S: [
+        [
+            [20, 0],
+            [15, 7],
+            [8, 14],
+            [3, 21],
+            [2, 27],
+            [5, 32],
+            [10, 34],
+            [15, 32],
+            [20, 27],
+
+            [25, 32],
+            [30, 34],
+            [35, 32],
+            [38, 27],
+            [37, 21],
+            [32, 14],
+            [25, 7],
+            [20, 0]
+        ],
+
+        // stem
+        [
+            [20, 27],
+            [20, 40]
+        ],
+
+        // base
+        [
+            [13, 40],
+            [27, 40]
+        ]
+    ],
+
+    // CLUB
+    C: [
+        // left lobe
+        [
+            [20, 18],
+            [16, 10],
+            [12, 5],
+            [7, 5],
+            [3, 8],
+            [2, 14],
+            [4, 19],
+            [9, 22],
+            [14, 21],
+            [20, 18]
+        ],
+
+        // right lobe
+        [
+            [20, 18],
+            [26, 10],
+            [28, 5],
+            [33, 5],
+            [37, 8],
+            [38, 14],
+            [36, 19],
+            [31, 22],
+            [26, 21],
+            [20, 18]
+        ],
+
+        // top lobe
+        [
+            [20, 18],
+            [15, 15],
+            [12, 10],
+            [13, 5],
+            [17, 1],
+            [20, 0],
+            [23, 1],
+            [27, 5],
+            [28, 10],
+            [25, 15],
+            [20, 18]
+        ],
+
+        // bottom point
+        [
+            [20, 18],
+            [20, 28]
+        ],
+
+        // stem
+        [
+            [15, 40],
+            [25, 40]
+        ],
+
+        [
+            [20, 28],
+            [15, 40]
+        ],
+
+        [
+            [20, 28],
+            [25, 40]
+        ]
+    ]
+};
+
+    // ------------------------------------------------------------
+    // TOP-LEFT VALUE
+    // ------------------------------------------------------------
+
+    const glyph = glyphs[rank];
+
+    if (glyph) {
+        for (const p of glyph) {
+            const translated = p.map(([x, y]) => [
+                8 + x * 0.65,
+                8 + y * 0.65
+            ]);
+
+            path(translated);
+        }
+    }
+
+    // Top-left suit
+    const suitGlyph = suitGlyphs[suit];
+
+    if (suitGlyph) {
+        for (const p of suitGlyph) {
+            const translated = p.map(([x, y]) => [
+                8 + x * 0.65,
+                36 + y * 0.65
+            ]);
+
+            path(translated);
+        }
+    }
+
+    // ------------------------------------------------------------
+    // LARGE CENTER SUIT
+    // ------------------------------------------------------------
+
+    if (suitGlyph) {
+        for (const p of suitGlyph) {
+            const translated = p.map(([x, y]) => [
+                50 + (x - 20) * 1.2,
+                70 + (y - 20) * 1.2
+            ]);
+
+            path(translated);
+        }
+    }
+
+    // ------------------------------------------------------------
+    // BOTTOM-RIGHT VALUE (ROTATED 180°)
+    // ------------------------------------------------------------
+
+    if (glyph) {
+        for (const p of glyph) {
+            const translated = p.map(([x, y]) => [
+                92 - x * 0.65,
+                132 - y * 0.65
+            ]);
+
+            path(translated);
+        }
+    }
+
+    return lines;
+}
+
+// Draw vector
+function drawCardLines(win, lines) {
+    ctx.beginPath();
+
+    for (const l of lines) {
+        ctx.moveTo(l[0]+win.x1, l[1]+win.y1);
+        ctx.lineTo(l[2]+win.x1, l[3]+win.y1);
+    }
+
+    ctx.stroke();
 }
