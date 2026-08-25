@@ -534,7 +534,8 @@ function spawnCardWin(card, x, y, scale) {
     rw.pervY = 10;
     rw.targetX = x;
     rw.targetY = y;
-    rw.childCard;
+    rw.childCard = 0;
+    rw.parentCard = 0;
     cast.push(rw);
     player.cardWindow.push(rw);
     //rw.setText(text, false);

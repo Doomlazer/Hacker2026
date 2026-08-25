@@ -162,14 +162,7 @@ function doMouseMove(e) {
                                 c.hasStartedDragging = true;
 
                                 // NOW actually remove it from its column
-                                for (let column of player.cColumns) {
-                                    const index = column.indexOf(c);
-
-                                    if (index !== -1) {
-                                        column.splice(index, 1);
-                                        break;
-                                    }
-                                }
+                                popCardFromColumn(c);
                             }
                             c.x1 = mouseX + oldOffX;
                             c.y1 = mouseY + oldOffY;
@@ -226,7 +219,7 @@ function doClick(e) {
     let s = cast.toSorted((a, b) => b.pri - a.pri);
     for (let i = 0; i < s.length; i++) {
         if (s[i].contains(mouseX, mouseY) && mouseUnclaimed) {
-            mouseUnclaimed = true;
+            mouseUnclaimed = false;
             s[i].clickHandler(e);
         }
     }
@@ -268,22 +261,19 @@ function doMouseDown(e) {
                 // draw this window on top now
                 setWindowPri(c);
 
-                // more CARD specific
+                // more CARD stuff
                 if (c.type == "card") {
                     touchedCard = true;
                     if (!player.cStored) {
                         c.mouseDrag = true;
-                        // picked up card from cStack
-                        if (player.cStack.includes(c)) {
-                            player.cStack.pop();
-                            if (player.cStack.length < 1) {
-                                resetCardStack();
-                            }
+
+                        // break the parent bond
+                        if (c.parentCard) {
+                            c.parentCard.childCard = 0;
                         }
-                        // picked up card from cDiscard
-                        if (player.cDiscard.includes(c)) {
-                            player.cDiscard.pop();
-                        }
+
+                        // pop from stack, discard and Aceholes
+                        popCard(c);
 
                         // ajust card order before dragging groups
                         let t = c;
@@ -309,7 +299,8 @@ function doMouseDown(e) {
                 } else {
                     c.resizing = false;
                 }
-                mouseUnclaimed = false;
+
+                //mouseUnclaimed = false;
                 break;
             }
 
@@ -397,11 +388,20 @@ function doMouseUp(e) {
             if (c.type == "card") {
                 // match another card?
                 for (let i of player.cardWindow) {
+                    // don't match cards in stack or discard
                     if (!player.cStack.includes(i) && !player.cDiscard.includes(i)) {
-                        if (i.shown &&
-                            isSolitaireMatch(c, i) &&
-                            intersects(c, i)) {
+                        // matched card must be shown 
+                        // valid matches
+                        // intersecting
+                        // and be child free
+                        if (
+                            i.shown &&
+                            isColumnMatch(c, i) &&
+                            intersects(c, i) &&
+                            i.childCard === 0
+                        ) {
                             i.childCard = c;
+                            c.parentCard = i;
                             c.targetX = i.targetX;
                             c.targetY = i.targetY + (30 * player.cScale);
                             moveChildren(c);
@@ -409,27 +409,46 @@ function doMouseUp(e) {
                     }
                 }
                 // placed on stack?
-                if (intersectsXY(c,
-                            player.cX,
-                            100 * player.cScale,
-                            player.cY,
-                            140 * player.cScale)) {
-                    // stack isnt shown
+                if (
+                    intersectsXY(
+                        c,
+                        player.cX,
+                        100 * player.cScale,
+                        player.cY,
+                        140 * player.cScale
+                    )
+                ) {
+                    // stack card never shown
                     c.shown = false;
                     c.targetX = player.cX;
                     c.targetY = player.cY;
+                    // break the parent/child bond
+                    if (c.parentCard) {
+                        c.parentCard.childCard = 0;
+                    }
                     c.childCard = 0;
                     player.cStack.push(c);
-                } else if (intersectsXY(c,
-                            player.cX + (120 * player.cScale),
-                            100 * player.cScale,
-                            player.cY,
-                            140 * player.cScale)) {
-                    // dropped on discard
+                // dropped on discard
+                } else if (
+                    intersectsXY(
+                        c,
+                        player.cX + (120 * player.cScale),
+                        100 * player.cScale,
+                        player.cY,
+                        140 * player.cScale
+                    )
+                ) {
                     c.targetX = player.cX + (120 * player.cScale);
                     c.targetY = player.cY;
+                    // break the parent/child bond
+                    if (c.parentCard) {
+                        c.parentCard.childCard = 0;
+                    }
                     c.childCard = 0;
                     player.cDiscard.push(c);
+                } else {
+                    // placed in aceholes?
+                    checkAceHoles(c);
                 }
             }
         }
