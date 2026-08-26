@@ -115,17 +115,13 @@ function intersectsXY(a, bx, bw, by, bh) {
 }
 
 function resetCardStack() {
-    console.log("Moved discarded cards to stack")
-    let hold = player.cDiscard.pop();
-    for (let i = player.cDiscard.length-1; i > 0 ; i--) {
+    for (let i = player.cDiscard.length-1; i > -1 ; i--) {
         const cur = player.cDiscard.pop();
         cur.shown = false;
         cur.targetX = player.cX;
         cur.targetY = player.cY;
         player.cStack.push(cur);
-        //console.log("stack, discard ", player.cStack,player.cDiscard)
     }
-    player.cDiscard.push(hold);
 }
 
 function checkEmptyColumn(win) {
@@ -246,16 +242,13 @@ function handleCardClick(win) {
     ) {
         // deal car to right of stack
         win.shown = true;
-        win.targetX = player.cX + (120 * player.cScale);
+        win.x1 = player.cX + (120 * player.cScale);
+        win.targetX = win.x1;
         setWindowPri(win);
         // move card from cStack. array to CDiscard
         player.cDiscard.push(player.cStack.pop());
         //console.log("stack to discard ", player.cStack,player.cDiscard)
         // return cards to stack
-        if (player.cStack.length < 1) {
-            // save top card and feed to stack
-            resetCardStack();
-        }
         return;
     }
 

@@ -341,15 +341,29 @@ function doMouseDown(e) {
     }
     
     if (!touchedCard && !player.cStored && player.cNotStoring) {
-        player.cNotStoring = false;
-        for (let c of player.cardWindow) {
-            c.prevX = c.x1;
-            c.prevY = c.y1;
-            c.targetX = getWidth() - (140 * player.cScale);
-            c.targetY = 10;
+        // first check if clicking on empty stack
+        if (
+            mouseX > player.cX &&
+            mouseX < player.cX + (100*player.cScale) &&
+            mouseY > player.cY &&
+            mouseY < player.cY + (140*player.cScale) &&
+            player.cStack.length < 1
+        ) {
+            // player has clicked through the stack reset it
+            resetCardStack();
+        } else {
+            // otherwise store deck
+            player.cNotStoring = false;
+            player.cStored = true;
+            for (let c of player.cardWindow) {
+                c.prevX = c.x1;
+                c.prevY = c.y1;
+                c.targetX = getWidth() - (140 * player.cScale);
+                c.targetY = 10;
+            }
         }
-        player.cStored = true;
     } else if (touchedCard && player.cStored && player.cNotStoring) {
+        // unstore deck
         player.cNotStoring = false;
         player.cStored = false;
         for (let c of player.cardWindow) {

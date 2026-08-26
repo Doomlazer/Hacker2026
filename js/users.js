@@ -30,10 +30,11 @@ class Player extends User{
         this.cDiscard = [];
         this.cMoney = 100;
         this.cScale = 0.8;
+        this.cPrevScale = 0.8;
+        this.cStored = false;
         this.cNotStoring = true;
         this.cX = getWidth() - 20 - (7 * (120 * this.cScale));
         this.cY = 20;
-        this.cStored = false;
         this.compromisedComputers = [];
         this.name = name;
         this.uName = this.name.split(" ")[0].substring(0,1).toLowerCase() + this.name.split(" ")[1].toLowerCase();

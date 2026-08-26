@@ -536,7 +536,7 @@ function spawnCardWin(card, x, y, scale) {
     cw.targetY = y;
     cw.childCard = 0;
     cw.parentCard = 0;
-    cw.cardLines = cardVector(cw.card, 0, 0, cw.xW / 100);
+    cw.cardLines = cardVector(cw.card, 0, 0, cw.scale);
     cast.push(cw);
     player.cardWindow.push(cw);
     //rw.setText(text, false);

@@ -8,9 +8,12 @@ function draw() {
 
     drawMap();
 
-    // release player.cNotProcessing if complete
+    // Release player.cNotStoring if complete.
+    // this is a terrible name to mean if the game is in 
+    // the process of storing or unstoring the deck.
     if (!player.cNotStoring) {
         let done = true;
+        // check if all cards have finished moving to their targetXY
         for (let win of cast) {
             if (win.type == "card") {
                 if (!(win.x1 == win.targetX && win.y1 == win.targetY)) {
@@ -20,7 +23,21 @@ function draw() {
         }
         if (done) {
             player.cNotStoring = true;
+            player.cResettingStack = false;
         }
+    }
+    // if the card deck loaded and not stored, 
+    // draw empty stack and Acehole indicators
+    if (
+        !player.cStored &&
+        player.cardWindow.length > 1
+    ) {
+        ctx.lineWidth = 2;
+        if (player.cStack < 1) {
+            drawEmptyStackIndicator();
+        }
+        drawAceholes();
+
     }
     // draw windows based on priority, highest is top most window
     let s = cast.toSorted((a, b) => a.pri - b.pri);
@@ -652,7 +669,7 @@ function drawWin(win) { // draw a window
             if (win.type == "card") {
                 // move cards twords dest
                 for (let c of player.cardWindow) {
-                    const speed = 0.6;
+                    const speed = 1;
 
                     const dx = c.targetX - c.x1;
                     const dy = c.targetY - c.y1;
@@ -666,9 +683,13 @@ function drawWin(win) { // draw a window
                         c.y1 += (dy / dist) * speed;
                     }
                 }
+
+                if (player.cScale != player.cPrevScale) {
+                    win.scale = player.cScale;
+                    win.cardLines = cardVector(win.card, 0, 0, win.scale);
+                }
                 
                 const lines = win.cardLines;
-                //console.log("parasieJah" + lines)
                 // Fill card
                 const cardPath = new Path2D();
                 
@@ -1550,14 +1571,36 @@ function drawCardLines(win, lines) {
     ctx.stroke();
 }
 
-function drawAceholes(win) {
+function drawEmptyStackIndicator() {
+    if (
+        mouseX > player.cX &&
+        mouseX < player.cX + (100*player.cScale) &&
+        mouseY > player.cY &&
+        mouseY < player.cY + (140*player.cScale)
+    ) {
+        ctx.strokeStyle = '#ff00ee';
+        ctx.strokeRect(
+            player.cX,
+            player.cY,
+            100*player.cScale,
+            140*player.cScale
+        );
+    }
+}
+
+function drawAceholes() {
     const y = player.cY;
     const w = 100 * player.cScale;
     const h = 140 * player.cScale;
     // check the aceholes
     for (let i = 0; i < 4; i++) {
         const x = player.cX + (i + 3) * (120 * player.cScale);
-        if (intersectsXY(win, x, w, y, h)) {
+        if (
+            mouseX > x &&
+            mouseX < x + w &&
+            mouseY > y &&
+            mouseY < y + h
+        ) {
             // is the hole empty? draw a little indicator for player comprehension
             if (player.cHoles[i].length < 1) {
                 ctx.strokeStyle = '#ffff00';
