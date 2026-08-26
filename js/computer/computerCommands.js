@@ -1011,18 +1011,11 @@ function malCommand(win, command) {
 function deckCommand(win, command) {
     if (command.length > 1) {
         if (command[1].toLowerCase() == "quit") {
-            for (const card of player.cardWindow) {
-                const index = cast.indexOf(card);
-
-                if (index !== -1) {
-                    //cast[0].setText("Delete..." + cast[index], false);
-                    cast.splice(index, 1);
-                }
-            }
-            player.cardWindow = [];
+            purgeCardWindow();
             cast[0].setText("Deleted Cards");
         }
     } else {
+        purgeCardWindow();
         initSolitaire();
     }
 }

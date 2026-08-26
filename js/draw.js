@@ -666,9 +666,6 @@ function drawWin(win) { // draw a window
                         c.y1 += (dy / dist) * speed;
                     }
                 }
-                if (!win.cardLines) {
-                    win.cardLines = cardVector(win.card, 0, 0, win.xW / 100);
-                }
                 
                 const lines = win.cardLines;
                 //console.log("parasieJah" + lines)
@@ -1542,7 +1539,6 @@ function cardVector(card, offsetX = 0, offsetY = 0, scale = 1) {
     return lines;
 }
 
-// Draw vector
 function drawCardLines(win, lines) {
     ctx.beginPath();
 
@@ -1552,4 +1548,21 @@ function drawCardLines(win, lines) {
     }
 
     ctx.stroke();
+}
+
+function drawAceholes(win) {
+    const y = player.cY;
+    const w = 100 * player.cScale;
+    const h = 140 * player.cScale;
+    // check the aceholes
+    for (let i = 0; i < 4; i++) {
+        const x = player.cX + (i + 3) * (120 * player.cScale);
+        if (intersectsXY(win, x, w, y, h)) {
+            // is the hole empty? draw a little indicator for player comprehension
+            if (player.cHoles[i].length < 1) {
+                ctx.strokeStyle = '#ffff00';
+                ctx.strokeRect(x, y, w, h);
+            }
+        }
+    }
 }

@@ -402,9 +402,12 @@ function doMouseUp(e) {
                         ) {
                             i.childCard = c;
                             c.parentCard = i;
-                            c.targetX = i.targetX;
-                            c.targetY = i.targetY + (30 * player.cScale);
+                            c.x1 = i.x1;
+                            c.y1 = i.y1 + (30 * player.cScale);
+                            c.targetX = c.x1;
+                            c.targetY = c.y1 
                             moveChildren(c);
+                            break;
                         }
                     }
                 }
@@ -447,8 +450,10 @@ function doMouseUp(e) {
                     c.childCard = 0;
                     player.cDiscard.push(c);
                 } else {
-                    // placed in aceholes?
+                    // snap in to aceholes
                     checkAceHoles(c);
+                    // finally snap to empty columns
+                    checkEmptyColumn(c);
                 }
             }
         }

@@ -514,33 +514,34 @@ function spawnReadWin(win, text) {
 
 function spawnCardWin(card, x, y, scale) {
     // a text reader window
-    let rw = new aniRect(x,// + (player.cardWindow.length * 20),
+    let cw = new aniRect(x,// + (player.cardWindow.length * 20),
                             y,// + (player.cardWindow.length * 20), 
                             100*scale, 140*scale);
     //rw.fontSize = win.readerFontSize;
-    rw.acceptInput = false;
-    rw.x1 = getWidth();
-    rw.y1 = 10;
-    rw.backgroundColor = '#fdfdfd';
-    rw.rectColor = '#ff0000';
-    rw.textColor = '#58e5fa';
-    rw.isRounded = false;
-    rw.hasBoarder = false;
-    rw.type = "card";
-    rw.card = card;
-    rw.scale = scale;
-    rw.shown = false;
-    rw.prevX;
-    rw.pervY = 10;
-    rw.targetX = x;
-    rw.targetY = y;
-    rw.childCard = 0;
-    rw.parentCard = 0;
-    cast.push(rw);
-    player.cardWindow.push(rw);
+    cw.acceptInput = false;
+    cw.x1 = getWidth();
+    cw.y1 = 10;
+    cw.backgroundColor = '#fdfdfd';
+    cw.rectColor = '#ff0000';
+    cw.textColor = '#58e5fa';
+    cw.isRounded = false;
+    cw.hasBoarder = false;
+    cw.type = "card";
+    cw.card = card;
+    cw.scale = scale;
+    cw.shown = false;
+    cw.prevX;
+    cw.pervY = 10;
+    cw.targetX = x;
+    cw.targetY = y;
+    cw.childCard = 0;
+    cw.parentCard = 0;
+    cw.cardLines = cardVector(cw.card, 0, 0, cw.xW / 100);
+    cast.push(cw);
+    player.cardWindow.push(cw);
     //rw.setText(text, false);
     
-    return rw;
+    return cw;
 }
 
 function spawnAudioWin(win, command) {

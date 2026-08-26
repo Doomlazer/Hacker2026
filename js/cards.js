@@ -16,7 +16,7 @@ function initSolitaire() {
         }
     }
 
-    // Remaining cards go into the stock/stack
+    // Remaining cards go into the stack
     while (cardIndex < deck.length) {
         let card = spawnCardWin(deck[cardIndex],
                 player.cX, 
@@ -86,11 +86,15 @@ function isAceholeMatch(cardA, cardB) {
            suitA === suitB;
 }
 
-function moveChildren(card) {
-    while (card.childCard) {
-        card.childCard.targetX = card.targetX;
-        card.childCard.targetY = card.targetY + (30 * player.cScale);
-        card = card.childCard;
+function moveChildren(win) {
+    while (win.childCard) {
+        // set the child card to parent x/y
+        win.childCard.x1 = win.x1;
+        win.childCard.y1 = win.y1 + (30 * player.cScale);
+        win.childCard.targetX = win.childCard.x1;
+        win.childCard.targetY = win.childCard.y1;
+        // do again for child if present
+        win = win.childCard;
     }
 }
 
@@ -111,7 +115,7 @@ function intersectsXY(a, bx, bw, by, bh) {
 }
 
 function resetCardStack() {
-    console.log("RESET CARD STACK")
+    console.log("Moved discarded cards to stack")
     let hold = player.cDiscard.pop();
     for (let i = player.cDiscard.length-1; i > 0 ; i--) {
         const cur = player.cDiscard.pop();
@@ -124,19 +128,71 @@ function resetCardStack() {
     player.cDiscard.push(hold);
 }
 
+function checkEmptyColumn(win) {
+    // snap to empty columns
+    // variations also done in handleCardClick() and checkAceHoles
+    const y = player.cY + (160 * player.cScale);
+    const w = 100 * player.cScale;
+    const h = 140 * player.cScale;
+
+    for (let i = 0; i < 7; i++) {
+        const x = player.cX + i * (120 * player.cScale);
+        const theColumn = player.cColumns[i];
+        // is the column empty and intersecting?
+        if (
+            intersectsXY(win, x, w, y, h) &&
+            theColumn.length < 1
+        ) {
+            win.x1 = x;
+            win.y1 = y;
+            theColumn.push(win);
+            win.targetX = win.x1;
+            win.targetY = win.y1;
+            moveChildren(win);
+
+            return;
+        
+        } else if (
+            // the top of the column stack
+            theColumn.length > 0 &&
+            !(theColumn[theColumn.length-1].shown) &
+            intersectsXY(
+                win,
+                theColumn[theColumn.length-1].x1,
+                w,
+                theColumn[theColumn.length-1].y1,
+                h
+            )
+        ) {
+            win.x1 = theColumn[theColumn.length-1].x1;
+            win.y1 = theColumn[theColumn.length-1].y1 + (30*player.cScale);
+            theColumn.push(win);
+            win.targetX = win.x1;
+            win.targetY = win.y1;
+            moveChildren(win);
+            
+            return;
+
+        }
+    }
+}
+
 function checkAceHoles(win) {
+    // check the aceholes
+    // variations also done in handleCardClick() and checkEmptyColumns()
     const y = player.cY;
     const w = 100 * player.cScale;
     const h = 140 * player.cScale;
-    // check the aceholes
+
     for (let i = 0; i < 4; i++) {
         const x = player.cX + (i + 3) * (120 * player.cScale);
+        const theHole = player.cHoles[i];
         if (intersectsXY(win, x, w, y, h)) {
             // is the hole empty?
-            if (player.cHoles[i].length < 1) {
+            if (theHole.length < 1) {
                 // is Ace?
                 if (win.card.slice(0, -1) === "A") {
-                    player.cHoles[i].push(win);
+                    theHole.push(win);
                     win.x1 = x;
                     win.y1 = y;
                     win.targetX = win.x1;
@@ -150,9 +206,9 @@ function checkAceHoles(win) {
                 }
             } else if (win.card.slice(0, -1) !== "A") {
                 // vaild match?
-                let topCard = player.cHoles[i][player.cHoles[i].length-1];
+                let topCard = theHole[theHole.length-1];
                 if (isAceholeMatch(win, topCard)) {
-                    player.cHoles[i].push(win);
+                    theHole.push(win);
                     win.x1 = x;
                     win.y1 = y;
                     win.targetX = win.x1;
@@ -164,23 +220,6 @@ function checkAceHoles(win) {
                     win.childCard = 0;
                     return;
                 }
-            }
-        }
-    }
-}
-
-function drawAceholes(win) {
-    const y = player.cY;
-    const w = 100 * player.cScale;
-    const h = 140 * player.cScale;
-    // check the aceholes
-    for (let i = 0; i < 4; i++) {
-        const x = player.cX + (i + 3) * (120 * player.cScale);
-        if (intersectsXY(win, x, w, y, h)) {
-            // is the hole empty?
-            if (player.cHoles[i].length < 1) {
-                ctx.strokeStyle = '#ffff00';
-                ctx.strokeRect(x, y, w, h);
             }
         }
     }
@@ -227,6 +266,7 @@ function handleCardClick(win) {
             win.shown = true;
         } else {
             // move cards into acehole
+            // variations are also done in checkEmptColumns & checkAceHoles()
             const suit = win.card.slice(-1);
             const rank = win.card.slice(0, -1);
             const y = player.cY;
@@ -251,7 +291,11 @@ function handleCardClick(win) {
                     }
                     win.childCard = 0;
                     break;
-                } else if (win.childCard == 0 && (win.card.slice(0, -1) !== "A")) {
+                } else if (
+                    win.childCard == 0 &&
+                    (win.card.slice(0, -1) !== "A") &&
+                    player.cHoles[i].length > 0
+                ) {
                     // vaild match?
                     let topCard = player.cHoles[i][player.cHoles[i].length-1];
                     if (isAceholeMatch(win, topCard)) {
@@ -302,4 +346,16 @@ function popCardFromColumn(c) {
             break;
         }
     }
+}
+
+function purgeCardWindow() {
+    for (const card of player.cardWindow) {
+        const index = cast.indexOf(card);
+
+        if (index !== -1) {
+            //cast[0].setText("Delete..." + cast[index], false);
+            cast.splice(index, 1);
+        }
+    }
+    player.cardWindow = [];
 }
