@@ -359,6 +359,11 @@ Mal90 Operations Manual
 
         BRUTE QUIT - K1ll 4ll
 
+
+        JUST FOR FUN
+
+        DECK - Play solitaire. Clicking on anything other than a card will hide the deck in the corner of the window. Click it again to resume. Use DECK QUIT to close the deck completely
+
         
         THE END
 
@@ -1015,7 +1020,7 @@ function deckCommand(win, command) {
                 }
             }
             player.cardWindow = [];
-            cast[0].setText("Deletd Cards");
+            cast[0].setText("Deleted Cards");
         }
     } else {
         initSolitaire();

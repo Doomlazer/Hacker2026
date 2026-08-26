@@ -533,28 +533,34 @@ class aniRect {
              this.xP = 1;
              this.yP = 1;
         } else if (this.delete) {
-            // flush it
-            const index = cast.indexOf(this);
-            
+            // first cleanse player.Arrays
             if (this.type == "proxy") {
-                //console.log(`player.proxyWindow: ${player.proxyWindow}`);
-                if (this == player.proxyWindow[0]) {
-                    player.proxyWindow.pop();
+                const index = player.proxyWindow.indexOf(this);
+                if (index !== -1) {
+                    player.proxyWindow.splice(index, 1);
                 }
             } else if (this.type == "brute") {
-                if (player.bruteWindow.length > 0) {
-                    player.bruteWindow.pop();
+                const index = player.bruteWindow.indexOf(this);
+                if (index !== -1) {
+                    player.bruteWindow.splice(index, 1);
                 }
             } else if (this.type == "audio") {
+                // there can be only one
                 player.audioPlayer = 0;
+                const index = cast.indexOf(this);
+                if (index !== -1) {
+                    cast.splice(index, 1);
+                }
             } else if (this.type == "reader") {
-                //console.log(`player.readerWindow: ${player.readerWindow}`);
-                if (this == player.readerWindow[0]) {
-                    player.readerWindow.pop();
+                const index = player.readerWindow.indexOf(this);
+                if (index !== -1) {
+                    player.readerWindow.splice(index, 1);
                 }
             }
-            if (index > -1) {
-                cast.splice(index, 1);
+            // finally remove it from cast too
+            const indexC = cast.indexOf(this);
+            if (indexC > -1) {
+                cast.splice(indexC, 1);
             }
         }
     }
