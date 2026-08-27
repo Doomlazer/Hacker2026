@@ -391,7 +391,7 @@ function fullscreenCommand(win) {
         cast[0].setText("Exiting Fullscreen...");
     }
     doResize();
-    mapXOff = getWidth()/3 * 2;
+    mapXOff = getWidth()/2;
     mapYOff = getHeight()/2;
     mapSteps = 0;
     mapInc = 0;

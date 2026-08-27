@@ -78,8 +78,8 @@ function doWheel(e) {
 
 function doMouseMove(e) {
     let adjustedWindow = false;
-    mouseX = e.x - 10; // - 2
-    mouseY = e.y - 25;// -17
+    mouseX = e.x;
+    mouseY = e.y;
     mouseDetail = e.detail;
 
     if (player.ignoreMouseDrag) {
@@ -228,15 +228,15 @@ function doClick(e) {
 function doMouseDown(e) {
     e.preventDefault();
     // update mouse first
-    mouseX = e.x - 10;
-    mouseY = e.y - 25;
+    mouseX = e.x;
+    mouseY = e.y;
 
     movingMap = false;
     mouseDown = true;
     mouseDetail = e.detail;
     let notFound = true;
     let touchedCard = false;
-
+    
     let s = cast.toSorted((a, b) => b.pri - a.pri);
     for (let w = 0; w < s.length; w++) {
         let c = s[w];
@@ -246,7 +246,6 @@ function doMouseDown(e) {
             mouseY < c.y1 + c.yH) {
 
             notFound = false;
-            
             // DRAGGING
             if (c.type == "card" && !c.shown) {
                 // don't drag cards that aren't shown
@@ -287,27 +286,26 @@ function doMouseDown(e) {
                 }
 
                 // Generic check if resizing instead of dragging
-                if (mouseX > c.x1 + c.xW - 20 &&
-                        mouseX < c.x1 + c.xW &&
-                        mouseY > c.y1 + c.yH - 20 &&
-                        mouseY < c.y1 + c.yH) { 
-                            c.resizing = true;
-                            c.resizeStartX = mouseX;
-                            c.resizeStartY = mouseY;
-                            c.resizeStartW = c.xW;
-                            c.resizeStartH = c.yH;
+                if (
+                    mouseX > c.x1 + c.xW - 20 &&
+                    mouseX < c.x1 + c.xW &&
+                    mouseY > c.y1 + c.yH - 20 &&
+                    mouseY < c.y1 + c.yH &&
+                    c.type != "card"
+                ) { 
+                    c.resizing = true;
+                    c.resizeStartX = mouseX;
+                    c.resizeStartY = mouseY;
+                    c.resizeStartW = c.xW;
+                    c.resizeStartH = c.yH;
                 } else {
                     c.resizing = false;
                 }
-
-                //mouseUnclaimed = false;
-                break;
             }
 
             // audio player buttons
             if (c.type == "audio") {
                 const bar = c.progressBar;
-
                 if (
                     mouseX >= bar.x &&
                     mouseX <= bar.x + bar.w &&
@@ -325,7 +323,6 @@ function doMouseDown(e) {
                 }
                 // audio controls    
                 for (const button of c.audioButtons) {
-
                     if (
                         mouseX >= button.x &&
                         mouseX <= button.x + button.w &&
@@ -337,6 +334,7 @@ function doMouseDown(e) {
                     }
                 }
             }
+            break;
         }
     }
     
@@ -358,8 +356,8 @@ function doMouseDown(e) {
             for (let c of player.cardWindow) {
                 c.prevX = c.x1;
                 c.prevY = c.y1;
-                c.targetX = getWidth() - (140 * player.cScale);
-                c.targetY = 10;
+                c.targetX = getWidth() - (100 * c.scale) - 1;
+                c.targetY = 1;
             }
         }
     } else if (touchedCard && player.cStored && player.cNotStoring) {
@@ -369,8 +367,8 @@ function doMouseDown(e) {
         for (let c of player.cardWindow) {
             c.targetX = c.prevX;
             c.targetY = c.prevY;
-            c.prevX = getWidth() - (140 * player.cScale);
-            c.prevY = 10;
+            c.prevX = getWidth() - (100 * c.scale) - 1;
+            c.prevY = 1;
         }
     }
 
@@ -386,8 +384,8 @@ function doMouseDown(e) {
 }
 
 function doMouseUp(e) {
-    mouseX = e.x - 10;
-    mouseY = e.y - 25;
+    mouseX = e.x;
+    mouseY = e.y;
     mouseDown = false;
     movingMouse = false;
     movingMap = false;
@@ -494,7 +492,7 @@ function doKeyDown(e) {
 
 function handleAudioButton(button) {
     const audio = backgroundMusic[0].audio;
-
+console.log("fuck me", button)
     switch (button) {
 
         case 0: // previous
@@ -506,6 +504,7 @@ function handleAudioButton(button) {
             break;
 
         case 1: // play/pause
+
             if (audio.paused) {
                 audio.play();
             } else {

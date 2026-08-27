@@ -1,5 +1,6 @@
 function initSolitaire() {
     // solitare 7 rows, 4 holes, stack, discard
+    player.cX = getWidth() - (7 * (120 * player.cScale));
     shuffle(deck);
     player.cStored = false;
     cast[0].setText("Dealing...");

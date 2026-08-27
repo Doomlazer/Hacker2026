@@ -640,52 +640,57 @@ function drawWin(win) { // draw a window
                 ctx.lineWidth = win.boarderLineWidth;
                 if (win.isRounded) {
                     ctx.beginPath();
-                    ctx.roundRect(win.x1 - (win.boarderWidth * (win.xP/win.xW)),
-                                    win.y1 - (win.boarderHeight * (win.yP / win.yH)),
-                                    win.xP + ((win.boarderWidth * (win.xP/win.xW)) * 2),
-                                    win.yP + ((win.boarderHeight * (win.yP / win.yH)) * 2),
-                                    win.cornerRad);
+                    ctx.roundRect(
+                        win.x1 - (win.boarderWidth * (win.xP/win.xW)),
+                        win.y1 - (win.boarderHeight * (win.yP / win.yH)),
+                        win.xP + ((win.boarderWidth * (win.xP/win.xW)) * 2),
+                        win.yP + ((win.boarderHeight * (win.yP / win.yH)) * 2),
+                        win.cornerRad
+                    );
                     ctx.stroke();
                 } else {
-                    ctx.strokeRect(win.x1 - (win.boarderWidth * (win.xP/win.xW)),
-                                    win.y1 - (win.boarderHeight * (win.yP / win.yH)),
-                                    win.xP + ((win.boarderWidth * (win.xP/win.xW)) * 2),
-                                    win.yP + ((win.boarderHeight * (win.yP / win.yH)) * 2));
+                    ctx.strokeRect(
+                        win.x1 - (win.boarderWidth * (win.xP/win.xW)),
+                        win.y1 - (win.boarderHeight * (win.yP / win.yH)),
+                        win.xP + ((win.boarderWidth * (win.xP/win.xW)) * 2),
+                        win.yP + ((win.boarderHeight * (win.yP / win.yH)) * 2)
+                    );
                 }
             }
 
             // box to resize window
-            if (mouseX > win.x1 + win.xW - 20 &&
-                        mouseX < win.x1 + win.xW &&
-                        mouseY > win.y1 + win.yH - 20 &&
-                        mouseY < win.y1 + win.yH) {
-                            ctx.strokeRect(win.x1 + win.xW - 20,
-                                    win.y1 + win.yH - 20,
-                                    20,
-                                    20);
+            if (
+                mouseX > win.x1 + win.xW - 20 &&
+                mouseX < win.x1 + win.xW &&
+                mouseY > win.y1 + win.yH - 20 &&
+                mouseY < win.y1 + win.yH
+            ) {
+                ctx.strokeRect(
+                    win.x1 + win.xW - 20,
+                    win.y1 + win.yH - 20,
+                    20,
+                    20
+                );
             }
 
             // card
             if (win.type == "card") {
-                // move cards twords dest
-                for (let c of player.cardWindow) {
-                    const speed = 1;
+                // move card twords dest
+                const speed = 40;
 
-                    const dx = c.targetX - c.x1;
-                    const dy = c.targetY - c.y1;
-                    const dist = Math.hypot(dx, dy);
+                const dx = win.targetX - win.x1;
+                const dy = win.targetY - win.y1;
+                const dist = Math.hypot(dx, dy);
 
-                    if (dist <= speed) {
-                        c.x1 = c.targetX;
-                        c.y1 = c.targetY;
-                    } else {
-                        c.x1 += (dx / dist) * speed;
-                        c.y1 += (dy / dist) * speed;
-                    }
+                if (dist <= speed) {
+                    win.x1 = win.targetX;
+                    win.y1 = win.targetY;
+                } else {
+                    win.x1 += (dx / dist) * speed;
+                    win.y1 += (dy / dist) * speed;
                 }
 
-                if (player.cScale != player.cPrevScale) {
-                    win.scale = player.cScale;
+                if (c.scale != c.targetScale) {
                     win.cardLines = cardVector(win.card, 0, 0, win.scale);
                 }
                 
@@ -723,8 +728,8 @@ function drawWin(win) { // draw a window
                     // Entire card in ONE canvas path
                     drawCardLines(win, lines);
                 } else {
+                    // back of card
                     ctx.strokeStyle = "#f5f3f3"
-                    //console.log(lines[1])
                     drawCardLines(win, lines.slice(0, 8));
                     ctx.strokeStyle = "#080808"
                     drawCardLines(win, lines.slice(8, 16));

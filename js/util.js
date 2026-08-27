@@ -1,8 +1,11 @@
 function doResize() {
-    c.width = getWidth() - 20;
-    c.height = getHeight() - 40;
-    cMap.width = getWidth() - 20;
-    cMap.height = getHeight() - 40;
+    let w = getBrowserWidth()// - 20;
+    let h = getBrowserHeight()// - 40;
+    c.width = w;
+    c.height = h;
+    cMap.width = w;
+    cMap.height = h;
+    
     mapXOff = getWidth()/3 * 2;
     mapYOff = getHeight()/2;
     mapSteps = 0;
@@ -12,7 +15,7 @@ function doResize() {
     mapNodeStackSteps = 0;
 }
 
-function getWidth() {
+function getBrowserWidth() {
     // multi-browser support
     if (self.innerWidth) {
     return self.innerWidth;
@@ -25,7 +28,7 @@ function getWidth() {
     }
 }
 
-function getHeight() {
+function getBrowserHeight() {
     if (self.innerHeight) {
     return self.innerHeight;
     }
@@ -35,6 +38,14 @@ function getHeight() {
     if (document.body) {
     return document.body.clientHeight;
     }
+}
+
+function getWidth() {
+    return c.width;
+}
+
+function getHeight() {
+    return c.height;
 }
 
 function getRandInt(i) {

@@ -30,10 +30,10 @@ class Player extends User{
         this.cDiscard = [];
         this.cMoney = 100;
         this.cScale = 0.8;
-        this.cPrevScale = 0.8;
+        this.cStoredScale = 0.25;
         this.cStored = false;
         this.cNotStoring = true;
-        this.cX = getWidth() - 20 - (7 * (120 * this.cScale));
+        this.cX; // assigned on deck init
         this.cY = 20;
         this.compromisedComputers = [];
         this.name = name;

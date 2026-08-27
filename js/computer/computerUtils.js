@@ -529,6 +529,7 @@ function spawnCardWin(card, x, y, scale) {
     cw.type = "card";
     cw.card = card;
     cw.scale = scale;
+    cw.targetScale = scale;
     cw.shown = false;
     cw.prevX;
     cw.pervY = 10;
