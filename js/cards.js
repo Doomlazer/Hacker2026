@@ -67,23 +67,20 @@ function isColumnMatch(cardA, cardB) {
            redA !== redB;
 }
 
-function isAceholeMatch(cardA, cardB) {
+function isAceholeMatch(card, topCard) {
     const rank = {
-        A: 13, '2': 12, '3': 11, '4': 10, '5': 9, '6': 8,
-        '7': 7, '8': 6, '9': 5, '10': 4,
-        J: 3, Q: 2, K: 1
+        A: 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6,
+        '7': 7, '8': 8, '9': 9, '10': 10,
+        J: 11, Q: 12, K: 13
     };
 
-    const suitA = cardA.card.slice(-1);
-    const suitB = cardB.card.slice(-1);
+    const suitA = card.card.slice(-1);
+    const suitB = topCard.card.slice(-1);
 
-    const rankA = rank[cardA.card.slice(0, -1)];
-    const rankB = rank[cardB.card.slice(0, -1)];
+    const rankA = rank[card.card.slice(0, -1)];
+    const rankB = rank[topCard.card.slice(0, -1)];
 
-    // cardB must be exactly one rank lower than cardA,
-    // and have the same suit
-    return rankA !== 1 &&
-           rankB === rankA + 1 &&
+    return rankA === rankB + 1 &&
            suitA === suitB;
 }
 
@@ -152,7 +149,7 @@ function checkEmptyColumn(win) {
         } else if (
             // the top of the column stack
             theColumn.length > 0 &&
-            !(theColumn[theColumn.length-1].shown) &
+            !(theColumn[theColumn.length-1].shown) &&
             intersectsXY(
                 win,
                 theColumn[theColumn.length-1].x1,
@@ -315,9 +312,6 @@ function popCard(win) {
     // picked up card from cStack
     if (player.cStack.includes(win)) {
         player.cStack.pop();
-        if (player.cStack.length < 1) {
-            resetCardStack();
-        }
     }
     // picked up card from cDiscard
     if (player.cDiscard.includes(win)) {
@@ -352,4 +346,8 @@ function purgeCardWindow() {
         }
     }
     player.cardWindow = [];
+    player.cColumns = [[],[],[],[],[],[],[]];
+    player.cHoles = [[],[],[],[]];
+    player.cStack = [];
+    player.cDiscard = [];
 }
