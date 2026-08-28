@@ -113,11 +113,13 @@ function intersectsXY(a, bx, bw, by, bh) {
 }
 
 function resetCardStack() {
+    let p = player.cDiscard.length-1;
     for (let i = player.cDiscard.length-1; i > -1 ; i--) {
         const cur = player.cDiscard.pop();
         cur.shown = false;
         cur.targetX = player.cX;
         cur.targetY = player.cY;
+        cur.pri = p - i;
         player.cStack.push(cur);
     }
 }

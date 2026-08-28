@@ -45,9 +45,9 @@ function draw() {
        drawWin(s[i]);
     }
 
-    if (player.cardWindow.length > 1) {
+    /*if (player.cardWindow.length > 1) {
         cardDebug();
-    }
+    }*/
 
     //drawIcon()
     drawCursor();
