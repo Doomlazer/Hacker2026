@@ -212,6 +212,14 @@ async function createFS(n) {
     );
 
     fs.createFile(
+        "C:\\System\\bin\\mail",
+        0,
+        0,
+        generateGiberish(62),
+        0
+    );
+
+    fs.createFile(
         "C:\\System\\bin\\reg",
         0,
         0,
@@ -575,6 +583,27 @@ function spawnProxyWin(win) {
     cast.push(pw);
     player.proxyWindow.push(pw);
     win.setProxyText();
+}
+
+function spawnMailWin() {
+    // the email client window
+    let mw = new aniRect(player.mX1, player.mY1, player.mXW, player.mYH);
+    mw.fontSize = player.mailFontSize;
+    mw.acceptInput = false;
+    mw.backgroundColor = player.mailBackgroundColor;
+    mw.rectColor = player.mailRectColor;
+    mw.textColor = player.mailTextColor
+    mw.isRounded = player.mailIsRounded;
+    mw.hasBoarder = player.mailHasBoarder;
+    mw.promptChar = "";
+    mw.authMode = true;
+    mw.host = "CyberSnail.com";
+    mw.user = "demo";
+    mw.password = "ds1$f0jsd2ofji"
+    mw.type = "mail";
+    cast.push(mw);
+    player.mailWindow = mw;
+    mw.text = ""; //generateGiberish(600);
 }
 
 function spawnBruteWin(win, command, ip, user, node) {

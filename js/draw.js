@@ -5,6 +5,7 @@ function draw() {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, c.width, c.height);
+    ctxCards.clearRect(0, 0, cCards.width, cCards.height);
 
     drawMap();
 
@@ -26,28 +27,15 @@ function draw() {
             player.cResettingStack = false;
         }
     }
-    // if the card deck loaded and not stored, 
-    // draw empty stack and Acehole indicators
-    if (
-        !player.cStored &&
-        player.cardWindow.length > 1
-    ) {
-        ctx.lineWidth = 2;
-        if (player.cStack < 1) {
-            drawEmptyStackIndicator();
-        }
-        drawAceholes();
 
-    }
     // draw windows based on priority, highest is top most window
     let s = cast.toSorted((a, b) => a.pri - b.pri);
     for (let i = 0; i < s.length; i++) {
        drawWin(s[i]);
     }
 
-    /*if (player.cardWindow.length > 1) {
-        cardDebug();
-    }*/
+    // cards have their own ctx drawn on top
+    drawCards();
 
     //drawIcon()
     drawCursor();
@@ -205,8 +193,7 @@ function drawMap() {
 
     // clear mapMarkers ctx if map reset
     if (mapSteps <= 1) {
-        ctxMarkers.fillStyle = '#000000';
-        ctxMarkers.fillRect(0, 0, c.width, c.height);
+        ctxMarkers.clearRect(0, 0, cMarkers.width, cMarkers.height);
     }
 
     // size of node/city sqaures
@@ -582,17 +569,15 @@ function drawIcon() {
 
 function drawWin(win) { // draw a window
         if (win.type == "card") {
-            // if over an empty acehole, draw indicator
-            if (win.mouseDrag) {
-                drawAceholes(win);
-            }
-
+            // skip open/close if playing card
             blitWinRect(win);
             win.xP = win.xW;
-            win.xP = win.yH;
+            win.yP = win.yH;
             return;
         }
-        // update the animation, blit the rect and boarders if fully open draw text.
+
+        // update the animation, blit the rect and 
+        // boarders if fully open draw text.
         if (win.toOpen) {
             // is opening
             if (win.xP < win.xW) {
@@ -706,21 +691,6 @@ function drawWin(win) { // draw a window
                 }
             }
 
-            // box to resize window
-            if (
-                mouseX > win.x1 + win.xW - 20 &&
-                mouseX < win.x1 + win.xW &&
-                mouseY > win.y1 + win.yH - 20 &&
-                mouseY < win.y1 + win.yH
-            ) {
-                ctx.strokeRect(
-                    win.x1 + win.xW - 20,
-                    win.y1 + win.yH - 20,
-                    20,
-                    20
-                );
-            }
-
             // card
             if (win.type == "card") {
                 // move card twords dest
@@ -738,7 +708,7 @@ function drawWin(win) { // draw a window
                     win.y1 += (dy / dist) * speed;
                 }
 
-                if (c.scale != c.targetScale) {
+                if (win.scale != win.targetScale) {
                     win.cardLines = cardVector(win.card, 0, 0, win.scale);
                 }
                 
@@ -755,20 +725,20 @@ function drawWin(win) { // draw a window
                 cardPath.closePath();
                 
                 if (win.shown) {
-                    ctx.globalAlpha = 1;
-                    ctx.fillStyle = win.backgroundColor;
+                    ctxCards.globalAlpha = 1;
+                    ctxCards.fillStyle = win.backgroundColor;
                 } else {
                     // back if card
-                    ctx.globalAlpha = win.alpha;
-                    ctx.fillStyle = '#0000FF'
+                    ctxCards.globalAlpha = win.alpha;
+                    ctxCards.fillStyle = '#0000FF'
                 }
-                ctx.fill(cardPath);
-                ctx.lineWidth = 2;
+                ctxCards.fill(cardPath);
+                ctxCards.lineWidth = 2;
                 if (win.shown) {
                     // Red / black
                     const suit = win.card.slice(-1).toUpperCase();
 
-                    ctx.strokeStyle =
+                    ctxCards.strokeStyle =
                         (suit === "H" || suit === "D")
                             ? "#fe0303"
                             : "#0b0b0b";
@@ -777,9 +747,9 @@ function drawWin(win) { // draw a window
                     drawCardLines(win, lines);
                 } else {
                     // back of card
-                    ctx.strokeStyle = "#f5f3f3"
+                    ctxCards.strokeStyle = "#f5f3f3"
                     drawCardLines(win, lines.slice(0, 8));
-                    ctx.strokeStyle = "#080808"
+                    ctxCards.strokeStyle = "#080808"
                     drawCardLines(win, lines.slice(8, 16));
                 }
                 
@@ -1088,6 +1058,157 @@ function drawWin(win) { // draw a window
                 );
 
                 ctx.restore();
+            }
+
+            if (win.type == "mail") {
+                ctx.save();
+                if (win.authMode) {
+                    drawMailAuth(win);
+                } else {
+                    const buttons = [
+                        "DELETE",
+                        "REPLY",
+                        "NEW",
+                        "QUIT"
+                    ];
+
+                    const buttonAreaY = win.x1/5;
+                    const buttonAreaH = win.xW/20;
+                    
+                    const pw = win.xP;
+                    const px = win.x1;
+
+                    const gap = pw * 0.1;
+                    const buttonSize = Math.min(
+                        buttonAreaH,
+                        (pw * 1.85 - gap * 3) / 4
+                    );
+
+                    const totalButtonsW =
+                        buttonSize * 2 * buttons.length +
+                        gap * (buttons.length - 1);
+
+                    const startX =
+                        px + (pw - totalButtonsW) / 2;
+
+                    buttons.forEach((text, i) => {
+
+                        const bx = startX + i * (buttonSize * 2 + gap);
+                        const by = win.y1 + (gap*2); //buttonAreaY;
+
+                        if (!win.mailButtons) {
+                            win.mailButtons = [];
+                        }
+
+                        win.mailButtons[i] = {
+                            x: bx,
+                            y: by,
+                            w: buttonSize * 2,
+                            h: buttonSize,
+                            action: i
+                        };
+                        //console.log(win.mailButtons)
+
+                        ctx.save();
+
+                        ctx.shadowColor = "black";
+                        ctx.shadowBlur = buttonSize * 0.15;
+                        ctx.shadowOffsetY = buttonSize * 0.08;
+
+                        if (mouseDown &&
+                            mouseX >= bx &&
+                            mouseX <= bx + (buttonSize*2) &&
+                            mouseY >= by &&
+                            mouseY <= by + buttonSize
+                        ) {
+                            ctx.fillStyle = brighten(win.backgroundColor, 25);
+                        } else {
+                            ctx.fillStyle = "#222";
+                        }
+                        ctx.beginPath();
+                        ctx.roundRect(
+                            bx,
+                            by,
+                            buttonSize * 2,
+                            buttonSize,
+                            buttonSize * 0.2
+                        );
+                        ctx.fill();
+
+                        ctx.restore();
+
+
+                        ctx.strokeStyle = brighten(
+                            win.backgroundColor,
+                            25
+                        );
+
+                        ctx.lineWidth = Math.max(1, buttonSize * 2 * 0.04);
+
+                        ctx.beginPath();
+                        ctx.roundRect(
+                            bx,
+                            by,
+                            buttonSize * 2,
+                            buttonSize,
+                            buttonSize * 0.2
+                        );
+                        ctx.stroke();
+
+                        ctx.fillStyle = "#eee";
+                        ctx.font = `${buttonSize * 0.4}px sans-serif`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+
+                        /*/ play/paused button icon
+                        if (i == 1) {
+                            if (audio && !audio.paused) {
+                                text = "⏸";
+                            }
+                        }*/
+
+                        ctx.fillText(
+                            text,
+                            bx + (buttonSize * 2) / 2,
+                            by + buttonSize / 2
+                        );
+                    });
+
+                    // inbox window
+                    ctx.fillStyle = '#262626';
+                    ctx.fillRect(
+                        win.x1 + (gap/10), 
+                        win.y1 + gap/10,
+                        win.xW - (gap/10*2),
+                        gap*2 - (gap/10*2)
+                    )
+
+                    // message window
+                    //ctx.fillStyle = '#363535';
+                    ctx.fillRect(
+                        win.x1 + (gap/10), 
+                        win.y1 + (gap*2.6),
+                        win.xW - (gap/10*2),
+                        win.yH - (gap/10) - (gap*2.6)
+                    )
+                }
+
+                ctx.restore();
+            }
+
+            // indicator box to resize window
+            if (
+                mouseX > win.x1 + win.xW - 20 &&
+                mouseX < win.x1 + win.xW &&
+                mouseY > win.y1 + win.yH - 20 &&
+                mouseY < win.y1 + win.yH
+            ) {
+                ctx.strokeRect(
+                    win.x1 + win.xW - 20,
+                    win.y1 + win.yH - 20,
+                    20,
+                    20
+                );
             }
         }
     }
@@ -1614,14 +1735,14 @@ function cardVector(card, offsetX = 0, offsetY = 0, scale = 1) {
 }
 
 function drawCardLines(win, lines) {
-    ctx.beginPath();
+    ctxCards.beginPath();
 
     for (const l of lines) {
-        ctx.moveTo(l[0]+win.x1, l[1]+win.y1);
-        ctx.lineTo(l[2]+win.x1, l[3]+win.y1);
+        ctxCards.moveTo(l[0]+win.x1, l[1]+win.y1);
+        ctxCards.lineTo(l[2]+win.x1, l[3]+win.y1);
     }
 
-    ctx.stroke();
+    ctxCards.stroke();
 }
 
 function drawEmptyStackIndicator() {
@@ -1631,8 +1752,8 @@ function drawEmptyStackIndicator() {
         mouseY > player.cY &&
         mouseY < player.cY + (140*player.cScale)
     ) {
-        ctx.strokeStyle = '#ff00ee';
-        ctx.strokeRect(
+        ctxCards.strokeStyle = '#ff00ee';
+        ctxCards.strokeRect(
             player.cX,
             player.cY,
             100*player.cScale,
@@ -1656,9 +1777,83 @@ function drawAceholes() {
         ) {
             // is the hole empty? draw a little indicator for player comprehension
             if (player.cHoles[i].length < 1) {
-                ctx.strokeStyle = '#ffff00';
-                ctx.strokeRect(x, y, w, h);
+                ctxCards.strokeStyle = '#ffff00';
+                ctxCards.strokeRect(x, y, w, h);
             }
+        }
+    }
+}
+
+function drawCards() {
+    // if the card deck loaded and not stored, 
+    // draw empty stack and Acehole indicators
+    if (
+        !player.cStored &&
+        player.cardWindow.length > 1
+    ) {
+        ctxCards.lineWidth = 2;
+        if (player.cStack < 1) {
+            drawEmptyStackIndicator();
+        }
+        drawAceholes();
+
+    }
+    
+    // copy cards to main ctx
+    ctx.drawImage(cCards, 0, 0);
+
+    /*if (player.cardWindow.length > 1) {
+        cardDebug();
+    }*/
+}
+
+function drawMailAuth(win) {
+    const fW = win.xW / 4;
+    const fH = win.yH / 10;
+    const fields = ["Host:", "User:","Password:"];
+    const strings = [win.host, win.user];
+    let pStr = "";
+    for (let i = 0; i < win.password.length; i++) {
+        pStr += "*";
+    }
+    strings.push(pStr);
+
+    if (win.xP == win.xW) {
+        ctx.fillStyle = '#f7f5f5';
+        ctx.font = scaleFont(0.02, "Courier new");
+        ctx.fillText(
+            "ZMail Client v2.00m",
+            win.x1 + (win.xW/8),
+            win.y1 + (win.yH/8)
+        );
+    }
+
+    ctx.font = scaleFont(0.02, "arial");
+    for (let i = 0; i < fields.length; i++) {
+        let f = fields[i];
+
+        if (win.xP == win.xW) {
+            ctx.fillStyle = '#c8c8c8';
+            ctx.fillText(
+                f,
+                win.x1 + (win.xP/3) - (fW/2),
+                win.y1 + (win.yP/3) - (fH/4) + (win.yP/5 * i) - 10
+            );
+        }
+        ctx.fillStyle = '#030303';
+        ctx.fillRect(
+            win.x1 + (win.xP/3) - (fW/2),
+            win.y1 + (win.yP/3) - (fH/4) + (win.yP/5 * i),
+            win.xP/1.8,
+            win.xP/15
+        );
+        if (win.xP == win.xW) {
+            ctx.fillStyle = '#f7f5f5';
+            ctx.fillText(
+                strings[i],
+                win.x1 + (win.xP/3) - (fW/2) + win.xP/15,
+                win.y1 + (win.yP/3) - (fH/4) + (win.yP/5 * i) + win.xP/22
+            );
         }
     }
 }

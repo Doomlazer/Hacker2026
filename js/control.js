@@ -16,9 +16,15 @@ function doWheel(e) {
     let s = cast.toSorted((a, b) => b.pri - a.pri);
     for (let w = 0; w < s.length; w ++) {
         let c = s[w];
+        
+        let o = 0;
+        // mail has a lowered scroll area
+        if (c.type == "mail") {
+            o = c.xW/10 * 2.6;
+        }
         if (mouseX > c.x1 &&
             mouseX < c.x1 + c.xW &&
-            mouseY > c.y1 &&
+            mouseY > c.y1 + o &&
             mouseY < c.y1 + c.yH &&
             !adjustedWindow) {
 
@@ -40,7 +46,7 @@ function doWheel(e) {
             c.wheelOff += e.deltaY;
 
             // set max
-            c.textMaxLines = Math.floor(c.yH / (c.fontSize * 1.25));
+            c.textMaxLines = Math.floor((c.yH - o) / (c.fontSize * 1.25));
     
             // clear
             ctx.fillStyle = '#000000';
@@ -51,6 +57,13 @@ function doWheel(e) {
             // clear
             ctxMarkers.fillStyle = '#000000';
             ctxMarkers.fillRect(0, 0, c.width, c.height);
+        } else if (mouseX > c.x1 &&
+            mouseX < c.x1 + c.xW &&
+            mouseY > c.y1 &&
+            mouseY < c.y1 + c.yH &&
+            !adjustedWindow) {
+                // do nothing when scrolling on mail above message area
+                adjustedWindow = true;
         }
     }
     // otherwise scale the map

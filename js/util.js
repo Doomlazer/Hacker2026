@@ -5,6 +5,10 @@ function doResize() {
     c.height = h;
     cMap.width = w;
     cMap.height = h;
+    cMarkers.width = w;
+    cMarkers.height = h;
+    cCards.width = w;
+    cCards.height = h;
     
     mapXOff = getWidth()/3 * 2;
     mapYOff = getHeight()/2;

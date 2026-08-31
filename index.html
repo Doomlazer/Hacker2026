@@ -71,6 +71,14 @@
         </canvas>
 
         <canvas
+            id="canvasCards"
+            width="1"
+            height="1"
+            style="display:none; border:0; margin:0; padding:0;">
+            Your browser does not support the HTML5 canvas tag.
+        </canvas>
+
+        <canvas
             id="canvasGL"
             width="1"
             height="1"
@@ -112,6 +120,8 @@
     const ctxMap = cMap.getContext("2d");
     const cMarkers = document.getElementById("canvasMarkers");
     const ctxMarkers = cMap.getContext("2d");
+    const cCards = document.getElementById("canvasCards");
+    const ctxCards = cCards.getContext("2d");
     const glCanvas = document.getElementById("canvasGL");
     const renderer = new GLRenderer(glCanvas);
     let cameraMatrix = new Float32Array([

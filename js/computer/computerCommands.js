@@ -141,6 +141,9 @@ function commandHandler(win, mal = false) {
                     indexedDB.deleteDatabase("VirtualFileSystemDB");
                     win.setText("you just deleted every filesystem on the planet. Hope you intended to do that!")
                     break;
+                case 'mail':
+                    mailCommand(win);
+                    break;
                 case 'help':
                     // display help file
                     helpCommand(win);
@@ -1017,5 +1020,14 @@ function deckCommand(win, command) {
     } else {
         purgeCardWindow();
         initSolitaire();
+    }
+}
+
+function mailCommand(win) {
+    if (player.mailWindow === 0) {
+        player.mailWindow = spawnMailWin();
+        win.setText("Loading eMail client...");
+    } else {
+        win.setText("eMail client already open...");
     }
 }

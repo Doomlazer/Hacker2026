@@ -70,5 +70,18 @@ class Player extends User{
         this.bXW = 300;
         this.bYH = 130;
         this.ignoreMouseDrag = false;
+        // email client
+        this.mailWindow = 0;
+        this.mailFontSize = 16;
+        this.mailText = ""
+        this.mailBackgroundColor = '#565555'
+        this.mailRectColor = '#ffffff'
+        this.mailTextColor = '#f1f1f1'
+        this.mailIsRounded = false;
+        this.mailHasBoarder = false;
+        this.mX1 = getWidth()/25 * 10;
+        this.mY1 = getHeight()/10;
+        this.mXW = 700;
+        this.mYH = 500;
     }
 }

@@ -106,7 +106,12 @@ class aniRect {
         ctx.font = this.fontSize + "px " + this.textFont;
 
         // set max lines
-        this.textMaxLines = Math.floor(this.yH / (this.fontSize * 1.25));
+        let o = 0;
+        // mail has a lowered scroll area
+        if (this.type == "mail") {
+            o = this.xW/10 * 2.6;
+        }
+        this.textMaxLines = Math.floor((this.yH - o) / (this.fontSize * 1.25));
 
         // wrap text
         let wrapped = this.textWrapLines(ctx, theText, this.xW - this.fontSize, 0);
@@ -514,10 +519,16 @@ class aniRect {
             } else {
                 max = this.displayLines.length;
             }
+            let o = 0;
+            if (this.type == "mail") {
+                o = this.xW/10 * 2.6;
+            }
             for (let i = this.wheelOff; i <  this.displayLines.length; i++) {
                 if (i - this.wheelOff < this.textMaxLines) {
-                ctx.fillText(this.displayLines[i], this.x1 + this.fontSize/2, 
-                            this.y1 + (this.fontSize) + (this.fontSize * 1.25 * (i-this.wheelOff)));
+                ctx.fillText(
+                    this.displayLines[i],
+                    this.x1 + this.fontSize/2, 
+                    this.y1 + o + (this.fontSize) + (this.fontSize * 1.25 * (i-this.wheelOff)));
                 }
             }
         }
@@ -544,6 +555,8 @@ class aniRect {
                 if (index !== -1) {
                     player.bruteWindow.splice(index, 1);
                 }
+            } else if (this.type == "mail") {
+                player.mailWindow = 0;
             } else if (this.type == "audio") {
                 // there can be only one
                 player.audioPlayer = 0;
