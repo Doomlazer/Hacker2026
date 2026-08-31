@@ -30,19 +30,6 @@ function doWheel(e) {
 
             adjustedWindow = true;
 
-            /*if (c.type == "proxy" || c.type == "reader" || c.type == "browser") {
-                c.wheelOff += e.deltaY;
-                //console.log(`wheelOff ; ${c.wheelOff} ${c.type}`)
-            } else {
-                // scale w and h by vertical scroll amount
-                c.xW -= e.deltaY;
-                c.yH -= e.deltaY;
-                c.xP -= e.deltaY;
-                c.yP -= e.deltaY;
-            }*/
-
-            // to do: I've disabled window resizing with 
-            // the mouse wheel, need do corner drag resizing
             c.wheelOff += e.deltaY;
 
             // set max
@@ -347,6 +334,41 @@ function doMouseDown(e) {
                     }
                 }
             }
+
+            // mail buttons
+            if (c.type == "mail") {
+                // clicked an auth field
+                if (c.authMode) {
+                    const fW = c.xW / 4;
+                    const fH = c.yH / 10;
+                    for (let i = 0; i < 3; i++) {
+                        
+                        if (
+                            mouseX > c.x1 + (c.xP/3) - (fW/2) &&
+                            mouseX < c.x1 + (c.xP/3) - (fW/2) + (c.xP/1.8) &&
+                            mouseY > c.y1 + (c.yP/3) - (fH/4) + (c.yP/5 * i) &&
+                            mouseY < c.y1 + (c.yP/3) - (fH/4) + (c.yP/5 * i) + (c.xP/15)
+                        ) {
+                            c.focusNum = i;
+                            break;
+                        }
+                    }
+                } else {
+                    // controls    
+                    for (const button of c.mailButtons) {
+                        if (
+                            mouseX >= button.x &&
+                            mouseX <= button.x + button.w &&
+                            mouseY >= button.y &&
+                            mouseY <= button.y + button.h
+                        ) {
+                            //handleAudioButton(button.action);
+                            break;
+                        }
+                    }
+                }
+            }
+
             break;
         }
     }
@@ -492,13 +514,17 @@ function doMouseUp(e) {
 }
 
 function doKeyDown(e) {
-    for (let i = 0; i < cast.length; i++) {
-        // dont add v when pasting data
-        if ((e.metaKey || e.ctrlKey) && e.code === "KeyV") {
-            return;
-        }
-        if (cast[i].acceptInput) {
-            cast[i].keyHandler(e);
+    if (player.mailWindow && player.mailWindow.authMode) {
+        player.mailWindow.authKeyHandler(e);
+    } else {
+        for (let i = 0; i < cast.length; i++) {
+            // dont add v when pasting data
+            if ((e.metaKey || e.ctrlKey) && e.code === "KeyV") {
+                return;
+            }
+            if (cast[i].acceptInput) {
+                cast[i].keyHandler(e);
+            }
         }
     }
 }

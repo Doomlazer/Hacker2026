@@ -142,6 +142,66 @@ class aniRect {
         }
     }
 
+    authKeyHandler(e) {
+        e.preventDefault();
+        if (e.key == "Enter") {
+            // execute entered string
+            if (this.focusNum == 2) {
+                this.authMode = false;
+            } else {
+                this.focusNum ++;
+            }
+        } else if (e.key == "Tab") {
+            if (this.focusNum == 2) {
+                this.focusNum = 0;
+            } else {
+                this.focusNum ++;
+            }
+        } else if (e.key == "Backspace") {
+            switch (this.focusNum) {
+                case 0:
+                    if (this.host.length > 0) {
+                        this.host = this.host.substring(0, this.host.length-1);
+                    }
+                    break;
+                case 1:
+                    if (this.user.length > 0) {
+                        this.user = this.user.substring(0, this.user.length-1);
+                    }
+                    break;
+                case 2:
+                    if (this.password.length > 0) {
+                        this.password = this.password.substring(0, this.password.length-1);
+                    }
+                    break;
+                default:
+            }
+        } else if (
+            e.key != "Control" &&
+            e.key != "Meta" &&
+            e.key != "Shift" &&
+            e.key != "Alt" &&
+            e.key != "CapsLock" &&
+            e.key != "ArrowLeft" &&
+            e.key != "ArrowRight"
+        ) {
+            switch (this.focusNum) {
+                case 0:
+                    this.host += e.key;
+                    break;
+                case 1:
+                    this.user += e.key;
+                    break;
+                case 2:
+                    this.password += e.key;
+                    break;
+                default:
+            }
+            
+        }
+
+    }
+
     keyHandler(e) {
         if (e.key == "Enter") {
             // execute entered string

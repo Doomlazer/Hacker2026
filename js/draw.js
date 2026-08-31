@@ -1856,4 +1856,14 @@ function drawMailAuth(win) {
             );
         }
     }
+
+    // focus
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#f5f1f1';
+    ctx.strokeRect(
+        win.x1 + (win.xP/3) - (fW/2),
+        win.y1 + (win.yP/3) - (fH/4) + (win.yP/5 * win.focusNum),
+        win.xP/1.8,
+        win.xP/15
+    );
 }

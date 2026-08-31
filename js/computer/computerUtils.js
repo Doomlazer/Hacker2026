@@ -597,13 +597,14 @@ function spawnMailWin() {
     mw.hasBoarder = player.mailHasBoarder;
     mw.promptChar = "";
     mw.authMode = true;
+    mw.focusNum = 0;
     mw.host = "CyberSnail.com";
     mw.user = "demo";
     mw.password = "ds1$f0jsd2ofji"
     mw.type = "mail";
     cast.push(mw);
-    player.mailWindow = mw;
     mw.text = ""; //generateGiberish(600);
+    return mw;
 }
 
 function spawnBruteWin(win, command, ip, user, node) {
