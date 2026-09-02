@@ -109,12 +109,12 @@ function createJSON(data, filename, mimeType = "application/json") {
     URL.revokeObjectURL(url);
 }
 
-function drawFSProgress(current, total) {
+function drawFSProgress(current, total, num = 0) {
 
     const width = 400;
     const height = 30;
     const x = 20;
-    const y = 10;
+    const y = 10 + (num * 40);
 
     const progress = current / total;
 
@@ -123,7 +123,7 @@ function drawFSProgress(current, total) {
     ctx.fillRect(x, y, width, height);
 
     // Progress
-    ctx.fillStyle = "#00ff00";
+    ctx.fillStyle = "#03a903";
     ctx.fillRect(
         x,
         y,
@@ -138,10 +138,32 @@ function drawFSProgress(current, total) {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
+    let str;
+    switch (num) {
+        case 0:
+            str = `Loading game data: ${current}/${total}`
+            break;
+        case 1:
+            str = `Populating email data: ${current}/${total}`
+            break;
+    }
+
     ctx.fillText(
-        `Loading game data: ${current}/${total}`,
+        str,
         x + width / 2,
         y + height / 2
     );
     ctx.restore();
+}
+
+function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }

@@ -598,9 +598,9 @@ function spawnMailWin() {
     mw.promptChar = "";
     mw.authMode = true;
     mw.focusNum = 0;
-    mw.host = "CyberSnail.com";
-    mw.user = "demo";
-    mw.password = "ds1$f0jsd2ofji"
+    mw.host = locations[0].email.split("@")[1];
+    mw.user = locations[0].email.split("@")[0];
+    mw.password = ""
     mw.type = "mail";
     cast.push(mw);
     mw.text = ""; //generateGiberish(600);
@@ -903,6 +903,28 @@ function setWindowPri(win) {
             }
         }
     }
+}
+
+async function populateEmailServers(i) {
+    // email provder every 256
+    let e = locations[i].email.split("@");
+    let nodeID = (emailProviders.indexOf(e[1]) + 1) * 256;
+    let fs = nodes[nodeID].fileSystem
+    //console.log(nodeID, fs)
+    if (!fs.getFolder(`C:\\Email`)) {
+        fs.createFolder(`C:\\Email`, 0, 0);
+    }
+    fs.createFolder(`C:\\Email\\${e[0]}`, 0, 0);
+    /*fs.createFile(
+        `C:\\Email\\${e[0]}\\garbage.eml`,
+        0,
+        0,
+        generateGiberish(857),
+        0
+    );*/
+
+    await fs.save();
+    //console.log(fs.getFolder('C:\\Email'))
 }
 
 

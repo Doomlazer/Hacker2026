@@ -138,8 +138,16 @@ function commandHandler(win, mal = false) {
             switch (command[0].toLowerCase()) {
                 case 'deleteall':
                     // debug command wipe the entire indexdb
-                    indexedDB.deleteDatabase("VirtualFileSystemDB");
-                    win.setText("you just deleted every filesystem on the planet. Hope you intended to do that!")
+                    const request = indexedDB.deleteDatabase("VirtualFileSystemDB");
+                    request.onsuccess = () => {
+                        win.setText("Database deleted");
+                    };
+                    request.onerror = (event) => {
+                        win.setText("Failed to delete database:", event.target.error);
+                    };
+                    request.onblocked = () => {
+                        win.setText("Deletion blocked — close all connections/tabs using the database.");
+                    };
                     break;
                 case 'mail':
                     mailCommand(win);

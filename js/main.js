@@ -91,7 +91,7 @@ function loadPasswords() {
         .then(response => response.json())
         .then(data => passwords = data)
         .then(result => {
-            shuffle[passwords]
+            shuffle(passwords);
             loadCities();
         })
         .catch(error => {
@@ -162,6 +162,55 @@ function loadNodes() {
         .catch(error => console.error('Error loading node JSON file', error));
 }
 
+function loadMap() {
+    fetch('data/map.json')
+        .then(response => response.json())
+        .then(data => map = data)
+        .then(result => {
+            // sluff unused map stuff
+            map = map.features;
+
+            let playersWindow = new aniRect(getWidth()/20, getHeight()/8, getWidth()/3, getHeight()/1.5);
+            attachNode(playersWindow, nodes[0]);
+            playersWindow.admins.push(0); // add player as admin to own computer
+            cast.push(playersWindow);
+
+            // dns
+            fsDNS(nodes[1].fileSystem, DNSServers[0], 1);
+            fsDNS(nodes[2].fileSystem, DNSServers[1], 2);
+
+            if (!nodes[256].fileSystem.getFolder(`C:\\Email`)) {
+                console.log("creating all emailsssss")
+                createAllEmails();
+            } else {
+                console.log("skipping email creation")
+                requestAnimationFrame(frame);
+            }
+
+            /*/ broswer test
+            let browser = new CanvasBrowser(
+                100,
+                100,
+                600,
+                400
+            );
+            cast.push(browser);
+            browser.open("./js/browser/test.html");*/
+
+        })
+        .catch(error => console.error('Error loading map JSON file', error));
+}
+
+function frame(timestamp) {
+    //renderer.beginFrame();
+    doBrute();
+    doCleanLogs();
+    draw();
+    //renderer.flush(cameraMatrix);
+
+    requestAnimationFrame(frame);
+}
+
 async function createAllFS() {
 
     const concurrency = 50;
@@ -183,51 +232,41 @@ async function createAllFS() {
         );
 
         drawFSProgress(end, locations.length);
+        //drawFSProgress(0, locations.length, 1);
     }
-
     console.log("ALL FILESYSTEMS CREATED");
-
+    const quota = await navigator.storage.estimate();
+    console.log('Approx total allocated space:', formatBytes(quota.quota));
+    console.log('Approx used space:', formatBytes(quota.usage));
     loadMap();
 }
 
-function loadMap() {
-    fetch('data/map.json')
-        .then(response => response.json())
-        .then(data => map = data)
-        .then(result => {
-            // sluff unused map stuff
-            map = map.features;
+async function createAllEmails() {
+    
+    
+    // email population
+    const concurrency = 50;
 
-            let playersWindow = new aniRect(getWidth()/20, getHeight()/8, getWidth()/3, getHeight()/1.5);
-            attachNode(playersWindow, nodes[0]);
-            playersWindow.admins.push(0); // add player as admin to own computer
-            cast.push(playersWindow);
+    for (let i = 0; i < locations.length; i += concurrency) {
 
-            // dns
-            fsDNS(nodes[1].fileSystem, DNSServers[0], 1);
-            fsDNS(nodes[2].fileSystem, DNSServers[1], 2);
+        const end = Math.min(
+            i + concurrency,
+            locations.length
+        );
 
-            /*/ broswer test
-            let browser = new CanvasBrowser(
-                100,
-                100,
-                600,
-                400
-            );
-            cast.push(browser);
-            browser.open("./js/browser/test.html");*/
+        await Promise.all(
+            Array.from(
+                { length: end - i },
+                (_, j) => populateEmailServers(i + j).then()
+            )
+        );
 
-            requestAnimationFrame(frame);
-        })
-        .catch(error => console.error('Error loading map JSON file', error));
-}
+        drawFSProgress(end, locations.length, 1);
+    }
 
-function frame(timestamp) {
-    //renderer.beginFrame();
-    doBrute();
-    doCleanLogs();
-    draw();
-    //renderer.flush(cameraMatrix);
-
+    console.log("Emails populated");
+    const quota = await navigator.storage.estimate();
+    console.log('Approx total allocated space:', formatBytes(quota.quota));
+    console.log('Approx used space:', formatBytes(quota.usage));
     requestAnimationFrame(frame);
 }
