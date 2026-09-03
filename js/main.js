@@ -180,7 +180,7 @@ function loadMap() {
             fsDNS(nodes[2].fileSystem, DNSServers[1], 2);
 
             if (!nodes[256].fileSystem.getFolder(`C:\\Email`)) {
-                console.log("creating all emailsssss")
+                console.log("creating all emails")
                 createAllEmails();
             } else {
                 console.log("skipping email creation")
@@ -232,7 +232,7 @@ async function createAllFS() {
         );
 
         drawFSProgress(end, locations.length);
-        //drawFSProgress(0, locations.length, 1);
+        drawFSProgress(0, locations.length, 1);
     }
     console.log("ALL FILESYSTEMS CREATED");
     const quota = await navigator.storage.estimate();

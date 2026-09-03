@@ -14,10 +14,10 @@ class GameTimer {
     }
 
     elapsed() {
-        const ms = Date.now() - this.startTime;
+        const ms = Date.now() - this.realStartTime;
 
         return {
-            milliseconds: ms % 100,
+            milliseconds: ms % 1000,
             seconds: Math.floor(ms / 1000),
             minutes: Math.floor(ms / 60000),
             hours: Math.floor(ms / 3600000),
@@ -52,8 +52,8 @@ class GameTimer {
         };
     }
     
-    formatted() {
-        const elapsed = Date.now() - this.realStartTime;
+    formatted(offset = 0) {
+        const elapsed = Date.now() - this.realStartTime + offset;
         const gameDate = new Date(this.startDate.getTime() + elapsed);
 
         const pad = n => String(n).padStart(2, "0");
@@ -61,4 +61,5 @@ class GameTimer {
         return `${gameDate.getFullYear()}-${pad(gameDate.getMonth() + 1)}-${pad(gameDate.getDate())} `
             + `${pad(gameDate.getHours())}:${pad(gameDate.getMinutes())}:${pad(gameDate.getSeconds())}`;
     }
+    
 }

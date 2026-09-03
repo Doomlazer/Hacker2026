@@ -670,7 +670,7 @@ function createAccounts(n) {
         // bad
         pwd = passwords[getRandInt(passwords.length-1)]
     }
-
+    //pwd = "password" // TESTING ONLY
     let a = [{"user": "root", "pwd":pwd, "admin": true, "userId":0}];
 
     if (n < locations.length) {
@@ -922,6 +922,29 @@ async function populateEmailServers(i) {
         generateGiberish(857),
         0
     );*/
+    let r = getRandInt(locations.length-1);
+    const email = EmailGenerator.generate({
+        fromEmail: locations[r].email,
+        toEmail: locations[i].email,
+        fromName: locations[r].homeowner.split(" ")[0],
+        toName: locations[i].homeowner.split(" ")[0],
+        
+        //domain: e[i]
+        //replyTo: messageId
+        /*attachment: {
+            name: "invoice.pdf",
+            size: 48231,
+            type: "application/pdf"
+        }
+            or
+        attachment: "invoice.pdf"    
+        */
+
+        //offset is milliseconds, so a time 1 hour before realStartTime:
+        // gameTimer.formatted(-60 * 60 * 1000)
+        timestamp: gameTimer.formatted(-getRandInt(4000) * 60 * 32 * 1000)
+    });
+    fs.createFile(`C:\\Email\\${e[0]}\\inbox`, 0, 0, JSON.stringify(email), 0);
 
     await fs.save();
     //console.log(fs.getFolder('C:\\Email'))
