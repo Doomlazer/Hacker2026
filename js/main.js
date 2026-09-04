@@ -242,13 +242,9 @@ async function createAllFS() {
 }
 
 async function createAllEmails() {
-    
-    
     // email population
     const concurrency = 50;
-
     for (let i = 0; i < locations.length; i += concurrency) {
-
         const end = Math.min(
             i + concurrency,
             locations.length
@@ -264,7 +260,6 @@ async function createAllEmails() {
         drawFSProgress(end, locations.length, 1);
     }
 
-    console.log("Emails populated");
     const quota = await navigator.storage.estimate();
     console.log('Approx total allocated space:', formatBytes(quota.quota));
     console.log('Approx used space:', formatBytes(quota.usage));

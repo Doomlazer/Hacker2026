@@ -1066,9 +1066,9 @@ function drawWin(win) { // draw a window
                     drawMailAuth(win);
                 } else {
                     const buttons = [
-                        "DELETE",
-                        "REPLY",
                         "NEW",
+                        "REPLY",
+                        "DELETE",
                         "QUIT"
                     ];
 

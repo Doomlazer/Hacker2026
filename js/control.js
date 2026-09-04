@@ -362,7 +362,7 @@ function doMouseDown(e) {
                             mouseY >= button.y &&
                             mouseY <= button.y + button.h
                         ) {
-                            //handleAudioButton(button.action);
+                            handleMailButton(c, button.action);
                             break;
                         }
                     }
@@ -531,7 +531,6 @@ function doKeyDown(e) {
 
 function handleAudioButton(button) {
     const audio = backgroundMusic[0].audio;
-console.log("fuck me", button)
     switch (button) {
 
         case 0: // previous
@@ -562,6 +561,25 @@ console.log("fuck me", button)
                 player.audioTrack = 0;
             }
             setAudioSource(player.audioPlaylist[player.audioTrack], backgroundMusic);
+            break;
+    }
+}
+
+function handleMailButton(win, button) {
+    switch (button) {
+
+        case 0: // New
+            break;
+
+        case 1: // Reply
+            break;
+
+        case 2: // Delete
+            break;
+
+        case 3: // Quit
+            win.toOpen = false;
+            win.delete = true;
             break;
     }
 }

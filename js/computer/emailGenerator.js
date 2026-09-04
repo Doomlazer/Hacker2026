@@ -6990,9 +6990,9 @@ This is an automated message and does not require a response.`
     });
   }
 
-  function createMessageId() {
-    // In a real backend this could be a UUID/database ID.
-    return `msg_${Date.now()}_${randomNumber(100000, 999999)}`;
+  function createMessageId(fromUser) {
+    //return `msg_${fromUser}_${randomNumber(100000, 999999)}`;
+    return `msg_${fromUser}${gameTimer.elapsed()}`;
   }
 
   function generate(options = {}) {
@@ -7008,13 +7008,9 @@ This is an automated message and does not require a response.`
       throw new Error(`Unknown email category: ${category}`);
     }
 
-    const fromName =
-      options.fromName ||
-      random(names);
+    const fromName = options.fromName; //|| random(names);
 
-    const toName =
-      options.toName ||
-      random(names.filter(name => name !== fromName));
+    const toName = options.toName; // || random(names.filter(name => name !== fromName));
 
     const data = {
       fromName,
@@ -7045,17 +7041,17 @@ This is an automated message and does not require a response.`
     );
 
     return {
-      messageId: createMessageId(),
+      messageId: createMessageId(options.fromName),
 
-      from: options.fromEmail || emailAddress(fromName),
+      from: options.fromEmail, //|| emailAddress(fromName),
 
-      to: options.toEmail || emailAddress(toName),
+      to: options.toEmail, // || emailAddress(toName),
 
       attachment: options.attachment || null,
 
       subject,
 
-      timestamp: options.timestamp || Date.now(),
+      timestamp: options.timestamp || gameTimer.elapsed(),
 
       message
     };

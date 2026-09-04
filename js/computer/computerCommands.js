@@ -100,6 +100,7 @@ function commandHandler(win, mal = false) {
             if (win.authTries >= 3) {
                 win.setText("Invalid password. Too many attempts\nDisconnected...");
                 win.authTries = 0;
+                player.askedForPwd = false;
                 logSSHDisconnect(win);
                 player.nodeStack.pop();
                 attachNode(win, nodes[stack.length-1]);

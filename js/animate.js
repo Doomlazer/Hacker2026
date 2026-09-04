@@ -380,10 +380,10 @@ class aniRect {
                     }
 
                     // Exactly one match
-                    this.inputStr = val[0].name;
+                    this.inputStr = val[0].name + " ";
 
                     this.displayLines[this.displayLines.length - 1] =
-                        node.promptChar + this.inputStr;
+                        node.promptChar + this.inputStr + " ";
 
                     return;
                 }
