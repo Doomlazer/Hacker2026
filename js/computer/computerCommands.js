@@ -230,7 +230,7 @@ function commandHandler(win, mal = false) {
                     regCommand(win);
                     break;
                 case 'setparam':
-                    setparamCommand(win, command);
+                    setParamCommand(win, command);
                     break;
                 case 'speak':
                     speakCommand(win, command);
@@ -788,7 +788,6 @@ function suCommand(win, command) {
             win.admins.push(user);
             for (let i = 0; i < win.admins.length; i++) {
                 win.text += locations[win.admins[i]].homeowner + " (" + win.admins[i] + ")";
-                console.log(`i: ${i}, win.admins.lenght): ${win.admins.length}`);
                 if (i < win.admins.length -1 && win.admins.length > 1) {
                     win.text +=  ", \n";
                 }
@@ -814,6 +813,7 @@ function scanCommand(win, command) {
                 win.text += `Found...${nodes[r].ip_address}\n`;
                 win.setText(win.text);
                 player.lastScanIP.push(nodes[r].ip_address);
+                mapCitiesSteps = 0;
                 mapNodeSteps = 0;
                 updateMap = true;
             }
@@ -838,7 +838,7 @@ function regCommand(win) {
     win.setText(win.text);
 }
 
-function setparamCommand(win, command) {
+function setParamCommand(win, command) {
     // probably needs improvement 
     // move some params out of animation window at least
 

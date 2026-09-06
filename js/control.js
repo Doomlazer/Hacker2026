@@ -69,12 +69,11 @@ function doWheel(e) {
             mapScale = 1;
         }
 
-        mapSteps = 0;
+        mapSteps = 1;
         mapInc = 0;
         mapCitiesSteps = 0;
         mapNodeSteps = 0;
         mapNodeStackSteps = 0;
-        drawMap();
     }
 }
 
@@ -91,8 +90,8 @@ function doMouseMove(e) {
 
 
     if (player.ignoreMouseDrag) {
-        // clicking on not shown cards needs to have no effect and without 
-        // ingnoreMouseDrag We'd be moving the map
+        // clicking on not shown cards needs to have no effect
+        // without ingnoreMouseDrag we'd be moving the map
         adjustedWindow = true;
     }
     if (mouseDown) {
@@ -224,19 +223,88 @@ function doMouseMove(e) {
         if (!adjustedWindow) {
             mapXOff = oldOffX - ((mouseDownX - mouseX));
             mapYOff = oldOffY - ((mouseDownY - mouseY));
-            mapSteps = 0;
+            mapSteps = 1;
             mapInc = 0;
             mapCitiesSteps = 0;
             mapNodeSteps = 0;
             mapNodeStackSteps = 0;
-            drawMap();
+        }
+    } else {
+        mouseLabel = "";
+        let bSize = 0.5;
+        // city label
+        if (
+            mapSteps >= mapStepsMax && 
+            player.drawCities &&
+            mapCitiesSteps >= cities.length
+        ) {
+            for (let i = 0; i < cities.length; i++) {
+                if (i < mapCitiesSteps) {
+                    let city = cities[i];
+                    if (city.population > player.cityPopulationThreshold) {
+                        if (
+                            mouseX > (city.lon * mapScale) + mapXOff - (bSize * mapScale/2) &&
+                            mouseX < (city.lon * mapScale) + mapXOff + (bSize * mapScale) &&
+                            mouseY > (-city.lat * mapScale) + mapYOff - (bSize * mapScale/2) &&
+                            mouseY < (-city.lat * mapScale) + mapYOff + (bSize * mapScale)
+                        ) {
+                            // city label if hovering
+                            mouseLabel = city.name + ", " + city.country +
+                                        ", population: " + (city.population);
+                        }
+                    }
+                }  else {
+                    // save cycles when i >= mapCitiesSteps
+                    break;
+                }         
+            }
+        }
+
+
+        // node label
+        if (
+            mapSteps >= mapStepsMax &&
+            player.drawNodes &&
+            mapNodeSteps >= nodes.length
+        ) {
+            for (let i = 0; i < nodes.length; i++) {
+                let node = nodes[i];
+                if (i < mapNodeSteps && node.discovered) {
+                    if (mouseX > (node.longitude * mapScale) + mapXOff - (bSize * mapScale/2) &&
+                        mouseX < (node.longitude * mapScale) + mapXOff + (bSize * mapScale) &&
+                        mouseY > (-node.latitude * mapScale) + mapYOff  - (bSize * mapScale/2) &&
+                        mouseY < (-node.latitude * mapScale) + mapYOff + (bSize * mapScale)) {
+                        // draw highlighted node marker
+                        ctxMarkers.globalAlpha = 1;
+                        ctxMarkers.strokeStyle = '#e60ed4';
+                        ctxMarkers.lineWidth = 3;
+                        ctxMarkers.strokeRect(
+                            (node.longitude * mapScale) + mapXOff - (bSize * mapScale/2),
+                            (-node.latitude * mapScale) + mapYOff - (bSize * mapScale/2),
+                            bSize * mapScale,
+                            bSize * mapScale
+                        ); 
+
+                        let label = node.ip_address + ", " + node.city;
+                        ctx.fillStyle = '#f4eded';
+                        ctx.font = scaleFont(0.010, "arial");
+                        ctx.fillText(
+                            label,
+                            (node.longitude * mapScale) + mapXOff,
+                            -(node.latitude * mapScale) + mapYOff + bSize
+                        );
+                    } 
+                }          
+            }
         }
     }
 }
 
 function doClick(e) {
     mouseUnclaimed = true;
-    let s = cast.toSorted((a, b) => b.pri - a.pri);
+    let s1 = cast.toSorted((a, b) => b.pri - a.pri);
+    // cards always on top and get clicks first
+    s = s1.toSorted((a, b) => (b.type === "card") - (a.type === "card"));
     for (let i = 0; i < s.length; i++) {
         if (s[i].contains(mouseX, mouseY) && mouseUnclaimed) {
             mouseUnclaimed = false;
@@ -257,10 +325,9 @@ function doMouseDown(e) {
     let notFound = true;
     let touchedCard = false;
     
-    let s = cast.toSorted((a, b) => b.pri - a.pri);
+    let s1 = cast.toSorted((a, b) => b.pri - a.pri);
     // cards always on top and get clicks first
-    //s = s1.toSorted((a, b) => (b.type === "card") - (a.type === "card"));
-    
+    s = s1.toSorted((a, b) => (b.type === "card") - (a.type === "card"));
     for (let w = 0; w < s.length; w++) {
         let c = s[w];
         if (mouseX > c.x1 &&
@@ -448,7 +515,78 @@ function doMouseDown(e) {
         oldOffY = mapYOff;
         mouseDownX = mouseX;
         mouseDownY = mouseY;
-        //updateMap = true;
+        let bSize = 0.5;
+
+        // clicked city
+        if (mapSteps >= mapStepsMax && player.drawCities) {
+            for (let i = 0; i < cities.length; i++) {
+                if (i < mapCitiesSteps) {
+                    let city = cities[i];
+                    if (city.population > player.cityPopulationThreshold) {
+                        if (
+                            mouseX > (city.lon * mapScale) + mapXOff - (bSize * mapScale/2) &&
+                            mouseX < (city.lon * mapScale) + mapXOff + (bSize * mapScale) &&
+                            mouseY > (-city.lat * mapScale) + mapYOff - (bSize * mapScale/2) &&
+                            mouseY < (-city.lat * mapScale) + mapYOff + (bSize * mapScale)
+                        ) {
+                            // mouseDeatil is number of clicks, move 
+                            // map to named location on doubleclick
+                            if (mouseDetail == 2 && mouseUnclaimed) {
+                                mapScale = 30;
+                                mapXOff = (getWidth()/3*2) - (city.lon * mapScale);
+                                mapYOff = (getHeight()/2) - (-city.lat * mapScale);
+                                mapSteps = 1;
+                                mapInc = 0;
+                                mapCitiesSteps = 0;
+                                mapNodeSteps = 0;
+                                player.selCountry = city.country;
+                                //console.log(player.selCountry);
+                                cast[0].text = `Selected ${city.name}, ${city.country}`;
+                                cast[0].setText(cast[0].text);
+                                player.selectedCity = city;
+                                updateMap = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // clicked node
+        if (mapSteps >= mapStepsMax && player.drawNodes) {
+            for (let i = 0; i < nodes.length; i++) {
+                let node = nodes[i];
+                if (i < mapNodeSteps && node.discovered) {
+                    if (
+                        mouseX > (node.longitude * mapScale) + mapXOff - (bSize * mapScale/2) &&
+                        mouseX < (node.longitude * mapScale) + mapXOff + (bSize * mapScale) &&
+                        mouseY > (-node.latitude * mapScale) + mapYOff  - (bSize * mapScale/2) &&
+                        mouseY < (-node.latitude * mapScale) + mapYOff + (bSize * mapScale)
+                    ) {
+                        // mouseDeatil is number of clicks, move 
+                        // map to named node on doubleclick
+                        if (mouseDetail == 2 && mouseUnclaimed) {
+                            mapScale = 50;
+                            mapXOff = (getWidth()/3*2) - (node.longitude * mapScale);
+                            mapYOff = (getHeight()/2) - (-node.latitude * mapScale);
+                            mapSteps = 1;
+                            mapInc = 0;
+                            mapCitiesSteps = 0;
+                            mapNodeSteps = 0;
+                            player.selCountry = node.country;
+                            //console.log(player.selcountry)
+                            cast[0].text = `Selected node: ${node.city}, ${node.country} \n
+                                            ${node.router.manufacturer} ${node.router.model} 
+                                            IP: ${node.ip_address}`;
+                            cast[0].setText(cast[0].text);
+                            cast[0].textDisplayChar = 0;
+                            player.selectedNode = nodes[i];
+                            updateMap = true;
+                        }
+                    } 
+                }          
+            }
+        }
     }
 }
 
