@@ -33,7 +33,10 @@ class Player extends User{
         this.cStoredScale = 0.25;
         this.cStored = false;
         this.cNotStoring = true;
-        this.cX; // assigned on deck init
+        this.cWon = false;
+        this.cWonCard;
+        this.cWonSpeed = 2;
+        this.cX = null; // assigned on deck init
         this.cY = 20;
         this.compromisedComputers = [];
         this.name = name;

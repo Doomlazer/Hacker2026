@@ -2,6 +2,8 @@ let mouseX = 0,
 mouseY = 0,
 mouseDownX = 0,
 mouseDownY = 0,
+mouseLastX = 0,
+mouseLastY = 0,
 oldOffX = 0,
 oldOffY = 0,
 mouseUnclaimed = false,
@@ -81,6 +83,12 @@ function doMouseMove(e) {
     mouseX = e.x;
     mouseY = e.y;
     mouseDetail = e.detail;
+    const dix = mouseX - mouseLastX;
+    const diy = mouseY - mouseLastY;
+
+    mouseLastX = mouseX;
+    mouseLastY = mouseY;
+
 
     if (player.ignoreMouseDrag) {
         // clicking on not shown cards needs to have no effect and without 
@@ -96,7 +104,6 @@ function doMouseMove(e) {
                     adjustedWindow = true;
                     if (c.resizing) {
                         if (c.type == "card") {
-
                             const dx = mouseX - c.resizeStartX;
                             const dy = mouseY - c.resizeStartY;
 
@@ -164,11 +171,24 @@ function doMouseMove(e) {
                                 // NOW actually remove it from its column
                                 popCardFromColumn(c);
                             }
-                            c.x1 = mouseX + oldOffX;
-                            c.y1 = mouseY + oldOffY;
-                            c.targetX = c.x1;
-                            c.targetY = c.y1;
-                            moveChildren(c);
+                            if (e.metaKey) {
+                                console.log(dix, diy)
+                                for (let card of player.cardWindow) {
+                                    card.x1 += dix;
+                                    card.y1 += diy;
+                                    card.targetX = card.x1;
+                                    card.targetY = card.y1;
+                                }
+                                player.cX += dix;
+                                player.cY += diy;
+                            } else {
+                                c.x1 = mouseX + oldOffX;
+                                c.y1 = mouseY + oldOffY;
+                                c.targetX = c.x1;
+                                c.targetY = c.y1;
+                                moveChildren(c);
+                            }
+                            
                         } else {
                             c.x1 = mouseX + oldOffX;
                             c.y1 = mouseY + oldOffY;
@@ -238,6 +258,9 @@ function doMouseDown(e) {
     let touchedCard = false;
     
     let s = cast.toSorted((a, b) => b.pri - a.pri);
+    // cards always on top and get clicks first
+    //s = s1.toSorted((a, b) => (b.type === "card") - (a.type === "card"));
+    
     for (let w = 0; w < s.length; w++) {
         let c = s[w];
         if (mouseX > c.x1 &&
@@ -252,6 +275,8 @@ function doMouseDown(e) {
                 touchedCard = true;
                 player.ignoreMouseDrag = true;
                 //setWindowPri(c);
+                oldOffX = c.x1 - mouseX;
+                oldOffY = c.y1 - mouseY;
             } else {
                 // all other windows
                 oldOffX = c.x1 - mouseX;
@@ -385,9 +410,18 @@ function doMouseDown(e) {
             // player has clicked through the stack reset it
             resetCardStack();
         } else {
+            // stop win animation 
+            if (player.cWon) {
+                player.cWon = false;
+                purgeCardWindow();
+                initSolitaire();
+                return;
+            }
+
             // otherwise store deck
             player.cNotStoring = false;
             player.cStored = true;
+
             for (let c of player.cardWindow) {
                 c.prevX = c.x1;
                 c.prevY = c.y1;

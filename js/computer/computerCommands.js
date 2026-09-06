@@ -603,7 +603,7 @@ function sshCommand(win, command) {
             } else {
                 // TESTING ONLY - DELETE
                 // Print the account info to console.log()
-                console.log("User: " + node.accounts[1].user + ", pwd: " + node.accounts[1].pwd);
+                //console.log("User: " + node.accounts[1].user + ", pwd: " + node.accounts[1].pwd);
                 // TESTING ONLY - DELETE
 
                 if (node.accounts.includes(player.tryAuthName)) {
@@ -1025,6 +1025,7 @@ function deckCommand(win, command) {
         if (command[1].toLowerCase() == "quit") {
             purgeCardWindow();
             cast[0].setText("Deleted Cards");
+            player.cWon = false;
         }
     } else {
         purgeCardWindow();

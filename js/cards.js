@@ -1,6 +1,8 @@
 function initSolitaire() {
     // solitare 7 rows, 4 holes, stack, discard
-    player.cX = getWidth() - (7 * (120 * player.cScale));
+    if (player.cX === null) {
+        player.cX = getWidth() - (7 * (120 * player.cScale));
+    }
     shuffle(deck);
     player.cStored = false;
     cast[0].setText("Dealing...");
@@ -188,6 +190,8 @@ function checkAceHoles(win) {
             if (theHole.length < 1) {
                 // is Ace?
                 if (win.card.slice(0, -1) === "A") {
+                    popCard(win);
+                    popCardFromColumn(win);
                     theHole.push(win);
                     win.x1 = x;
                     win.y1 = y;
@@ -204,6 +208,8 @@ function checkAceHoles(win) {
                 // vaild match?
                 let topCard = theHole[theHole.length-1];
                 if (isAceholeMatch(win, topCard)) {
+                    popCard(win);
+                    popCardFromColumn(win);
                     theHole.push(win);
                     win.x1 = x;
                     win.y1 = y;
@@ -291,7 +297,10 @@ function handleCardClick(win) {
                 ) {
                     // vaild match?
                     let topCard = player.cHoles[i][player.cHoles[i].length-1];
+                    //if (true && player.cHoles[i].length<13) {
                     if (isAceholeMatch(win, topCard)) {
+                        popCard(win);
+                        popCardFromColumn(win);
                         player.cHoles[i].push(win);
                         win.x1 = x;
                         win.y1 = y;
@@ -352,4 +361,48 @@ function purgeCardWindow() {
     player.cHoles = [[],[],[],[]];
     player.cStack = [];
     player.cDiscard = [];
+}
+
+function cardDebug() {
+    let s = "stack: ",
+    d = "discard: ",
+    a0 = "a0: ",
+    a1 = "a1: ",
+    a2 = "a2: ",
+    a3 = "a3: ",
+    c0 = "c0: ",
+    c1 = "c1: ",
+    c2 = "c2: ",
+    c3 = "c3: ",
+    c4 = "c4: ",
+    c5 = "c5: ",
+    c6 = "c6: ",
+    strings = [s, d, a0, a1, a2, a3, c0, c1, c2, c3, c4, c5, c6];
+    arrays = [
+        player.cStack,
+        player.cDiscard,
+        player.cHoles[0],
+        player.cHoles[1],
+        player.cHoles[2],
+        player.cHoles[3],
+        player.cColumns[0],
+        player.cColumns[1],
+        player.cColumns[2],
+        player.cColumns[3],
+        player.cColumns[4],
+        player.cColumns[5],
+        player.cColumns[6]
+    ]
+    for (let i = 0; i < strings.length; i++) {
+        buildDebug(strings[i], arrays[i], i)
+    }
+}
+
+function buildDebug(str, array, i) {
+    for (let a of array) {
+        str += `${a.card} `
+    }
+    ctx.fillStyle = '#f4efef';
+    ctx.font = "14px arial";
+    ctx.fillText(str, 10, 30 + (30 * i));
 }

@@ -167,3 +167,44 @@ function formatBytes(bytes, decimals = 2) {
 
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
+
+function bounce(n) {
+  const speed = Number(player.cWonSpeed) || 1;
+  const width = getWidth();
+  const height = getHeight();
+
+  if (!n.bounce) {
+    n.x1 = Number(n.x1) || 0;
+    n.y1 = Number(n.y1) || 0;
+
+    n.bounce = {
+      // Constant horizontal velocity for this card.
+      vx: (Math.random() < 0.5 ? -1 : 1) * speed,
+
+      // Initial upward velocity.
+      vy: -(7 + Math.random() * 5),
+
+      // Gravity.
+      gravity: 0.30
+    };
+  }
+
+  const b = n.bounce;
+
+  // Vertical physics
+  b.vy += b.gravity;
+  n.y1 += b.vy;
+
+  // Constant horizontal motion
+  n.x1 += b.vx;
+
+  // Card's bottom hits the bottom of the screen.
+  const floor = height - n.yH;
+
+  if (n.y1 >= floor) {
+    n.y1 = floor;
+
+    // Bounce upward, losing vertical energy.
+    b.vy = -Math.abs(b.vy) * 0.68;
+  }
+}

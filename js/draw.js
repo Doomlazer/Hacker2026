@@ -5,7 +5,6 @@ function draw() {
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, c.width, c.height);
-    ctxCards.clearRect(0, 0, cCards.width, cCards.height);
 
     drawMap();
 
@@ -28,14 +27,30 @@ function draw() {
         }
     }
 
+    if (
+        (
+            player.cHoles[0].length == 13 &&
+            player.cHoles[1].length == 13 &&
+            player.cHoles[2].length == 13 &&
+            player.cHoles[3].length == 13
+        ) || !player.cWon
+    ) {
+        ctxCards.clearRect(0, 0, cCards.width, cCards.height);
+    }
     // draw windows based on priority, highest is top most window
     let s = cast.toSorted((a, b) => a.pri - b.pri);
     for (let i = 0; i < s.length; i++) {
-       drawWin(s[i]);
+        if (player.cWon && s[i].type == "card") {
+            if(s[i] == player.cWonCard || player.cHoles[0].length == 13) {
+                drawWin(s[i]);  
+            }
+        } else {
+            drawWin(s[i]);
+        }
     }
-
     // cards have their own ctx drawn on top
     drawCards();
+    //cardDebug();
 
     //drawIcon()
     drawCursor();
@@ -693,19 +708,54 @@ function drawWin(win) { // draw a window
 
             // card
             if (win.type == "card") {
-                // move card twords dest
-                const speed = 40;
+                // check if game completed
+                if (
+                    player.cHoles[0].length == 13 &&
+                    player.cHoles[1].length == 13 &&
+                    player.cHoles[2].length == 13 &&
+                    player.cHoles[3].length == 13 &&
+                    !player.cWon
+                ) {
+                    player.cWonCard = player.cHoles[0].pop();
+                    //console.log(player.cWonCard)
+                    player.cWon = true;
+                    player.cWonSpeed = getRandInt(6) + 1;
+                    for (let i = 0; i<4; i++){
+                        drawWin(player.cHoles[i][player.cHoles[i].length-1]);
+                    }
+                }
 
-                const dx = win.targetX - win.x1;
-                const dy = win.targetY - win.y1;
-                const dist = Math.hypot(dx, dy);
-
-                if (dist <= speed) {
-                    win.x1 = win.targetX;
-                    win.y1 = win.targetY;
+                if (player.cWon) {
+                    if (win === player.cWonCard) {
+                        bounce(win);
+                        if (
+                            win.x1 < (0 - win.xW)  ||
+                            win.x1 > getWidth()
+                        ) {
+                            for (let i = 0; i < player.cHoles.length; i ++) {
+                                if (player.cHoles[i].length > 0) {
+                                    player.cWonSpeed = getRandInt(8) + 1;
+                                    player.cWonCard = player.cHoles[i].pop();
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    win.x1 += (dx / dist) * speed;
-                    win.y1 += (dy / dist) * speed;
+                    // move card twords dest
+                    const speed = 40;
+
+                    const dx = win.targetX - win.x1;
+                    const dy = win.targetY - win.y1;
+                    const dist = Math.hypot(dx, dy);
+
+                    if (dist <= speed) {
+                        win.x1 = win.targetX;
+                        win.y1 = win.targetY;
+                    } else {
+                        win.x1 += (dx / dist) * speed;
+                        win.y1 += (dy / dist) * speed;
+                    }
                 }
 
                 if (win.scale != win.targetScale) {
@@ -752,7 +802,6 @@ function drawWin(win) { // draw a window
                     ctxCards.strokeStyle = "#080808"
                     drawCardLines(win, lines.slice(8, 16));
                 }
-                
             }
             if (win.type == "audio") {
                 ctx.save();

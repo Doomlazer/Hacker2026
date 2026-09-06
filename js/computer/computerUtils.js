@@ -670,7 +670,7 @@ function createAccounts(n) {
         // bad
         pwd = passwords[getRandInt(passwords.length-1)]
     }
-    pwd = "password" // TESTING ONLY
+    //pwd = "password" // TESTING ONLY
     let a = [{"user": "root", "pwd":pwd, "admin": true, "userId":0}];
 
     if (n < locations.length) {
@@ -722,7 +722,7 @@ function createAccounts(n) {
         } else {
             pwd = passwords[getRandInt(passwords.length)];
         }
-        pwd = "password" // testing only    
+        //pwd = "password" // testing only    
         let b = {"user": uname, "pwd": pwd, "admin": true, "userId": 1};
         
         a.push(b);
