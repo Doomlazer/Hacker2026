@@ -274,7 +274,7 @@ Mal90 Operations Manual
 
         Mal90 Br0wzerOperating System by Vid30Dr0mEE, l337 HAx0r p.o.s.OS .,'"You get what you pay 4"',. Forked from TonyOS v2.309.1 R.I.P PheakySmurph J0nnyK4t, Rulz.
         
-        In addition to dumb terminal functionality, the Mal90 includes several t00lz to facilitate network scanning and account cracking. The TonySoft registration lock has been disabled since v0.1134.777 when the servers went offline and promising your f1rst b0rn to a corporation was no longer required just to run an OS. Use mousewheel to scroll document text  
+        In addition to dumb terminal functionality, the Mal90 includes several t00lz to facilitate network scanning and account cracking. The TonySoft registration lock has been disabled since v0.1134.777 when the servers went offline and promising your f1rst b0rn to \${Kleptocorp} was no longer required just to run an OS! PRAISE $TONY$. Use mousewheel to scroll document text  
 
         Interpreter Version 1.001.064
         December 1992
@@ -284,18 +284,18 @@ Mal90 Operations Manual
 
         Known Bugs:
 
-        \tWindow click priority is still broken
-        \tCorporations are evil
+        \tWindow click priority is still broken sometimes
         \tClicking on nodes in the map causes crashing
+        \tTab Completion is not quite adequate
         
-        Remember that, like a hammer, a computer is just a tool; The morality of its use is determined by the individu4l. - CMOTDibblersDistant2ndCousin
+        \"...like a hammer, a computer is just a tool; The morality of its use is determined by the individu4l.\"\n\t\t\t\t\t- CMOTDibblersDistant2ndCousin
         
-        IMPORTANT DISCLAIMER: While this is a browser-based game, the simulated computers are created locally on your device only. The pretend tools in this videogame, such as SSH, are NOT connecting over the internet to real computers. The DTMF tones from DIAL are NOT makeing real world phone calls. That said, this game does make real network connections for the command AUDIO, which streams music from real urls over the real world (outside this game) internet.
+        IMPORTANT NOTICE TO THE PLAYER: Despite the fact this is a browser-based game, the simulated computers are created locally on your device only. The pretend tools in this videogame, such as SSH, are NOT connecting over the internet to real computers. The DTMF tones from DIAL are NOT makeing real world phone calls. That said, this game does make real network connections for the command AUDIO, which streams music from real urls over the real world internet. Streaming Jungle music (and whatever URLs you add to the playlist) is the only network connection this game will make.
         
         
         COMMANDS
 
-        The commands installed on this computer can be found in the C:\\System\\bin folder. Type BIN to list its contents. Commands must be installed in this folder to be run. Valid programs outside this folder will not be executed.
+        The commands installed on a computer can typically be found in the C:\\System\\bin folder. Type BIN to list its contents. Commands must be installed in this folder to be run. Valid programs outside this folder will not be executed.
 
         
         NAVIGATING THE FILESYSTEM AND BASIC FEATURES
@@ -374,7 +374,12 @@ Mal90 Operations Manual
 
         JUST FOR FUN
 
-        DECK - Play solitaire. Clicking on anything other than a card will hide the deck in the corner of the window. Click it again to resume. Use DECK QUIT to close the deck completely
+        DECK - Play solitaire. Hold Command + mouseDrag on any face-up card to reposition the solitaire playfeild. Use DECK to reshuffle.
+
+        DECK LOCK - Toggles if clicking away from the DECK cards hides them or not. Hiding the deck saves the previous card posistions and allows for quick multi-tasking. DECK LOCK ON is recommended when focusing on solitaire to ignnore unintentional clicks.
+
+        DECK QUIT - Quits the DECK application. Warning: Progress will not be saved!
+
 
         
         THE END
@@ -386,7 +391,8 @@ Mal90 Operations Manual
         “There is no spoon.”
         \t\t\t\t\t\t\t\t—- The Matrix
 
-        V1d30 your documentation was shit and I had to rewrite h4lf of it becuse it didnt work at all how you described - X3r0x v1.001.065 Aug 1994
+        Yo,V1d30Dr0me!!11!!11 your documentation was sh1tni had to rewrite h4lf of it becuse it didnt work how u described. I added DELETEALL to wipe this games local data. use with caution
+        \t\t\t- X3r0x v1.001.065 Aug 1994
         `);
 }
 
@@ -1026,6 +1032,16 @@ function deckCommand(win, command) {
             purgeCardWindow();
             cast[0].setText("Deleted Cards");
             player.cWon = false;
+        } else if (command[1].toLowerCase() == "lock") {
+            if (player.cLock) {
+                player.cLock = false;
+                cast[0].setText("DECK LOCK OFF");
+            } else {
+                player.cLock = true;
+                cast[0].setText("DECK LOCK ON"); 
+            }
+        } else {
+            cast[0].setText("DECK Error: Unknown option " + command[1]);
         }
     } else {
         purgeCardWindow();

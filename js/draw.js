@@ -652,7 +652,7 @@ function drawWin(win) { // draw a window
                     player.cWonCard = player.cHoles[0].pop();
                     //console.log(player.cWonCard)
                     player.cWon = true;
-                    player.cWonSpeed = getRandInt(6) + 1;
+                    player.cWonSpeed = getRandInt(10) + 1;
                     for (let i = 0; i<4; i++){
                         drawWin(player.cHoles[i][player.cHoles[i].length-1]);
                     }
@@ -667,7 +667,7 @@ function drawWin(win) { // draw a window
                         ) {
                             for (let i = 0; i < player.cHoles.length; i ++) {
                                 if (player.cHoles[i].length > 0) {
-                                    player.cWonSpeed = getRandInt(8) + 1;
+                                    player.cWonSpeed = getRandInt(10) + 1;
                                     player.cWonCard = player.cHoles[i].pop();
                                     break;
                                 }
@@ -953,10 +953,10 @@ function drawWin(win) { // draw a window
                 progress = Math.max(0, Math.min(1, progress));
 
                 const barW = pw * 0.8;
-                const barH = Math.max(4, ph * 0.015);
+                const barH = Math.max(8, ph * 0.015);
 
                 const barX = px + (pw - barW) / 2;
-                const barY = py + ph * 0.88;
+                const barY = py + ph * 0.82;
 
                 // save bar for clicking
                 win.progressBar = {
@@ -968,7 +968,7 @@ function drawWin(win) { // draw a window
 
 
                 // background
-                ctx.fillStyle = "#333";
+                ctx.fillStyle = "#6b6a6a";
                 ctx.beginPath();
                 ctx.roundRect(
                     barX,

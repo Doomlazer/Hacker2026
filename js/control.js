@@ -170,8 +170,8 @@ function doMouseMove(e) {
                                 // NOW actually remove it from its column
                                 popCardFromColumn(c);
                             }
-                            if (e.metaKey) {
-                                console.log(dix, diy)
+                            if (e.metaKey && !player.cWon) {
+                                //console.log(dix, diy)
                                 for (let card of player.cardWindow) {
                                     card.x1 += dix;
                                     card.y1 += diy;
@@ -188,6 +188,22 @@ function doMouseMove(e) {
                                 moveChildren(c);
                             }
                             
+                        } else if (c.type == "brute") {
+                            if (e.metaKey) {
+                                // move them all
+                                //console.log(dix, diy)
+                                for (let card of player.bruteWindow) {
+                                    card.x1 += dix;
+                                    card.y1 += diy;
+                                    card.targetX = card.x1;
+                                    card.targetY = card.y1;
+                                }
+                                player.bX1 += dix;
+                                player.bY1 += diy;
+                            } else {
+                                c.x1 = mouseX + oldOffX;
+                                c.y1 = mouseY + oldOffY;
+                            }
                         } else {
                             c.x1 = mouseX + oldOffX;
                             c.y1 = mouseY + oldOffY;
@@ -485,15 +501,17 @@ function doMouseDown(e) {
                 return;
             }
 
-            // otherwise store deck
-            player.cNotStoring = false;
-            player.cStored = true;
+            if (!player.cLock) {
+                // otherwise store deck
+                player.cNotStoring = false;
+                player.cStored = true;
 
-            for (let c of player.cardWindow) {
-                c.prevX = c.x1;
-                c.prevY = c.y1;
-                c.targetX = getWidth() - (100 * c.scale) - 1;
-                c.targetY = 1;
+                for (let c of player.cardWindow) {
+                    c.prevX = c.x1;
+                    c.prevY = c.y1;
+                    c.targetX = getWidth() - (100 * c.scale) - 1;
+                    c.targetY = 1;
+                }
             }
         }
     } else if (touchedCard && player.cStored && player.cNotStoring) {

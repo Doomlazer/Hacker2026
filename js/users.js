@@ -36,6 +36,7 @@ class Player extends User{
         this.cWon = false;
         this.cWonCard;
         this.cWonSpeed = 2;
+        this.cLock = false;
         this.cX = null; // assigned on deck init
         this.cY = 20;
         this.compromisedComputers = [];

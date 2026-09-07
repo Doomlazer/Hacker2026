@@ -90,7 +90,7 @@ class aniRect {
         this.aX1 = getWidth()/25 * 11;
         this.aY1 = getHeight()/8;
         this.aXW = getWidth()/5;
-        this.aYH = getHeight()/5;
+        this.aYH = getHeight()/8;
         this.songScrollOffset = 0;
         this.songScrollSpeed = 1;
     }

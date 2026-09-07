@@ -662,8 +662,8 @@ function createAccounts(n) {
     let r = getRandInt(100)
     if (r > 35) {
         // sort of strong
-        pwd = passwords[getRandInt(passwords.length-1)] + getRandInt(999);
-    } else if (r < 5) {
+        pwd = passwords[getRandInt(passwords.length-1)] + getRandInt(9);
+    } else if (r < 1) {
         // movie
         pwd = movie[getRandInt(movie.length-1)];
     } else {
